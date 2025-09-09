@@ -4,10 +4,37 @@
 
 **Objetivo:** Validar el correcto funcionamiento de componentes individuales de la aplicación (clases, providers, repositorios).
 
-**Herramientas utilizadas:** flutter_test, mockito para simular dependencias externas.
+**Herramientas utilizadas:**
+- `flutter_test`: Proporciona un conjunto de utilidades y funciones para crear y ejecutar pruebas unitarias en aplicaciones Flutter, permitiendo validar el comportamiento de widgets, clases y lógica de negocio de manera aislada.
+- `mockito`: Permite simular dependencias externas, como APIs, bases de datos o servicios de almacenamiento, lo que facilita probar los componentes de manera controlada sin depender de recursos reales. Esto asegura que las pruebas sean reproducibles y predecibles.
 
 **Alcance:**
-Aca iria lo de la seccion 2
+
+### Total de Pruebas por Capa
+- **Capa de Datos:** 47 pruebas
+- **Capa de Dominio:** 16 pruebas  
+- **Capa de Presentación:** 25 pruebas
+- **Total:** 88 pruebas unitarias
+
+### Funcionalidades Cubiertas
+- Autenticación de usuarios
+- Recuperación de contraseña
+- Cambio de contraseña
+- Verificación de estado de autenticación
+- Gestión de preferencias de biometría
+- Almacenamiento seguro de tokens
+- Validación de formularios
+- Manejo de errores y excepciones
+- Estados de carga y éxito/error
+
+### Casos de Error Cubiertos
+- Errores de conexión (timeout, socket)
+- Errores de autenticación (credenciales incorrectas)
+- Errores de almacenamiento (permisos, disponibilidad)
+- Errores de servidor (500, HTML inesperado)
+- Errores de validación (campos requeridos, longitud mínima)
+- Errores de biometría (no disponible, bloqueado, cancelado)
+
 
 **Resultado:** Todas las pruebas ejecutadas arrojaron resultados correctos, permitiendo detectar y corregir casos de error en validaciones.
 
@@ -243,35 +270,6 @@ Aca iria lo de la seccion 2
   - ✅ Mostrar error de validación para contraseña muy corta
   - ✅ No mostrar errores de validación con datos válidos
   - ✅ Navegar a la pantalla de recuperación de contraseña cuando se presiona el botón de olvidó su contraseña
-
----
-
-## 3. Resumen de Cobertura
-
-### 3.1 Total de Pruebas por Capa
-- **Capa de Datos:** 47 pruebas
-- **Capa de Dominio:** 16 pruebas  
-- **Capa de Presentación:** 25 pruebas
-- **Total:** 88 pruebas unitarias
-
-### 3.2 Funcionalidades Cubiertas
-- Autenticación de usuarios
-- Recuperación de contraseña
-- Cambio de contraseña
-- Verificación de estado de autenticación
-- Gestión de preferencias de biometría
-- Almacenamiento seguro de tokens
-- Validación de formularios
-- Manejo de errores y excepciones
-- Estados de carga y éxito/error
-
-### 3.3 Casos de Error Cubiertos
-- Errores de conexión (timeout, socket)
-- Errores de autenticación (credenciales incorrectas)
-- Errores de almacenamiento (permisos, disponibilidad)
-- Errores de servidor (500, HTML inesperado)
-- Errores de validación (campos requeridos, longitud mínima)
-- Errores de biometría (no disponible, bloqueado, cancelado)
 
 ---
 

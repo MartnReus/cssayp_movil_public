@@ -4,7 +4,11 @@
 
 **Objetivo:** Validar el correcto funcionamiento de flujos completos de la aplicación, incluyendo la interacción entre múltiples componentes y la navegación entre pantallas.
 
-**Herramientas utilizadas:** integration_test, flutter_test, mockito para simular respuestas del servidor.
+**Herramientas utilizadas:** 
+- `integration_test`: Framework oficial de Flutter para pruebas de integración que permite probar la aplicación completa en un dispositivo real o emulador, simulando interacciones del usuario real.
+- `flutter_test`: Proporciona utilidades para testing de widgets y validación de comportamientos en la interfaz de usuario.
+- `mockito`: Permite simular servicios externos y dependencias para crear escenarios controlados de prueba.
+- `flutter_riverpod`: Facilita la inyección de dependencias y el manejo de estado durante las pruebas.
 
 **Alcance:**
 - Validación de flujos completos de autenticación
