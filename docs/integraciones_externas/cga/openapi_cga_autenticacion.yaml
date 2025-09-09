@@ -1,0 +1,299 @@
+openapi: 3.0.0
+info:
+  title: API de Autenticación del Sistema CGA
+  version: 1.0.0
+  description: "Especificación de los endpoints relacionados con la autenticación de usuarios para la aplicación móvil. Esta especificación refleja el comportamiento actual del sistema CGA, incluyendo respuestas con código 200 para credenciales incorrectas (indicadas por nro_afiliado: 0) y 500 para solicitudes inválidas."
+servers:
+  - url: https://cga.capsantafe.org.ar/cga/ws
+    description: Servidor de producción de la API del Sistema CGA
+paths:
+  /usr/login:
+    post:
+      summary: Autenticación de usuario y obtención de token de sesión
+      description: "Permite a un afiliado intentar iniciar sesión utilizando sus credenciales del sistema CGA. **Nota: Una respuesta 200 puede indicar tanto éxito como fallo de autenticación. El fallo se identifica si `nro_afiliado` es `0` y se incluye un campo `mensaje`. Una solicitud inválida (ej. campos faltantes o tipo incorrecto) puede resultar en un 500.**"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                usuario:
+                  type: string
+                  description: Nombre de usuario o número de afiliado utilizado para la autenticación.
+                  example: juan.perez
+                password:
+                  type: string
+                  description: Contraseña del usuario para la autenticación.
+                  format: password
+              required:
+                - usuario
+                - password
+            examples:
+              correctCredentials:
+                summary: Credenciales correctas
+                value:
+                  usuario: afiliado123
+                  password: miContrasenaSegura
+              incorrectPassword:
+                summary: Contraseña incorrecta
+                value:
+                  usuario: afiliado123
+                  password: contrasenaIncorrecta
+              missingField:
+                summary: Falta campo 'password'
+                value:
+                  usuario: afiliado123
+              incorrectType:
+                summary: Tipo de campo 'usuario' incorrecto
+                value:
+                  usuario: 12345
+                  password: miContrasena
+      responses:
+        "200":
+          description: "Autenticación procesada. Retorna los datos del afiliado y el token si la autenticación fue exitosa. Si las credenciales son incorrectas, `nro_afiliado` será `0` y se incluirá un `mensaje`."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nro_afiliado:
+                    type: integer
+                    description: "Número identificador único del afiliado. Será `0` si las credenciales son incorrectas."
+                    example: 12345
+                  apellido_nombres:
+                    type: string
+                    description: "Cadena de texto con el apellido y nombre completo del afiliado. Formato: APELLIDO, NOMBRES. **Este campo no estará presente o estará vacío si `nro_afiliado` es `0`.**"
+                    example: "PEREZ, JUAN"
+                  nombres:
+                    type: string
+                    description: "Campo legacy. Cadena de texto vacía. No utilizado por la aplicación móvil. **Este campo no estará presente o estará vacío si `nro_afiliado` es `0`.**"
+                    example: ""
+                  cambiar_password:
+                    type: integer
+                    description: "Indicador numérico: 0 si no se requiere cambio de contraseña, 1 si el afiliado debe cambiar su contraseña al iniciar sesión. **Este campo no estará presente o será irrelevante si `nro_afiliado` es `0`.**"
+                    enum: [0, 1]
+                    example: 0
+                  token:
+                    type: string
+                    description: "JSON Web Token (JWT) para la autenticación de peticiones posteriores. Solo presente si la autenticación fue exitosa (cuando `nro_afiliado` no es `0`). Debe ser incluido en el header 'Authorization' como 'Bearer <token>'."
+                    example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJuYWYiOiIxNTMzNiIsImRpZyI6IjIiLCJjaXIiOiIxIiwic2V4IjoiTSIsInZhbCI6MH0.a8cG56oROW4UyAazqBswDu8LZSlIhS38ksClsyz-5D8"
+                  mensaje:
+                    type: string
+                    description: "Mensaje informativo, presente solo si `nro_afiliado` es `0` (credenciales incorrectas)."
+                    example: "Datos incorrectos"
+                required:
+                  - nro_afiliado
+              examples:
+                success:
+                  summary: Autenticación Exitosa
+                  value:
+                    nro_afiliado: 12345
+                    apellido_nombres: "PEREZ, JUAN"
+                    nombres: ""
+                    cambiar_password: 0
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+                failureIncorrectCredentials:
+                  summary: Autenticación Fallida (Credenciales Incorrectas)
+                  value:
+                    nro_afiliado: 0
+                    mensaje: "Datos incorrectos"
+        "500":
+          description: "Error interno del servidor o solicitud inválida. Este código de estado es devuelto cuando faltan campos requeridos en la solicitud, los tipos de datos son incorrectos, o si ocurre un error inesperado en el servidor."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Mensaje de error que indica la naturaleza del problema.
+                    example: "Internal server error: 'password' field is missing."
+  /usr/recuperar-password:
+    post:
+      summary: Solicitar recuperación de contraseña
+      description: "Permite a un afiliado solicitar la recuperación de su contraseña, enviando un enlace de restablecimiento a su correo electrónico registrado, previa validación de captcha. **Nota: Este endpoint siempre devuelve un código de estado 201, incluso si hay errores (captcha incorrecto, email no enviado, o error interno específico de CGA).**"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nroDocumento:
+                  type: string
+                  description: "Número de documento del afiliado (se espera un string, el sistema lo padeará a 8 dígitos con ceros a la izquierda)."
+                  example: "12345678"
+                nroAfiliado:
+                  type: integer
+                  description: "Número de afiliado."
+                  example: 54321
+                captcha:
+                  type: string
+                  description: "Código de seguridad de CAPTCHA ingresado por el usuario."
+                  example: "abcde"
+              required:
+                - nroDocumento
+                - nroAfiliado
+                - captcha
+            examples:
+              successfulRequest:
+                summary: Solicitud de recuperación válida
+                value:
+                  nroDocumento: "12345678"
+                  nroAfiliado: 54321
+                  captcha: "validcaptcha"
+              invalidCaptcha:
+                summary: Captcha incorrecto
+                value:
+                  nroDocumento: "12345678"
+                  nroAfiliado: 54321
+                  captcha: "wrongcode"
+              missingField:
+                summary: Falta campo 'captcha'
+                value:
+                  nroDocumento: "12345678"
+                  nroAfiliado: 54321
+      responses:
+        "200":
+          description: "Resultado de la solicitud de recuperación de contraseña. Puede indicar éxito (email enviado) o diferentes tipos de errores (captcha incorrecto, email no enviado, datos incorrectos de afiliado)."
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/RecuperarPasswordSuccessResponse'
+                  - $ref: '#/components/schemas/RecuperarPasswordEmailErrorResponse'
+                  - $ref: '#/components/schemas/RecuperarPasswordCaptchaErrorResponse'
+                  - $ref: '#/components/schemas/RecuperarPasswordCGAErrorResponse'
+              examples:
+                successEmailSent:
+                  summary: Email de recuperación enviado exitosamente
+                  value:
+                    estado: "1"
+                    dominio_email: "ejemplo.com"
+                emailSendingFailed:
+                  summary: No se pudo enviar el email
+                  value:
+                    estado: "0"
+                    mensaje: "No se pudo enviar el email"
+                captchaIncorrect:
+                  summary: Código de captcha incorrecto
+                  value:
+                    estado: "0"
+                    mensaje: "El código ingresado no es correcto"
+                cgaInternalError:
+                  summary: Error interno de CGA (p.ej. datos de afiliado incorrectos)
+                  value:
+                    id_recuperar_password: 0
+                    message: "No se encontró un afiliado con los datos proporcionados."
+components:
+  schemas:
+    AuthSuccessResponse:
+      type: object
+      properties:
+        nro_afiliado:
+          type: integer
+          description: "Número identificador único del afiliado. Será `0` si las credenciales son incorrectas."
+          example: 12345
+        apellido_nombres:
+          type: string
+          description: "Cadena de texto con el apellido y nombre completo del afiliado. Formato: APELLIDO, NOMBRES. **Este campo no estará presente o estará vacío si `nro_afiliado` es `0`.**"
+          example: "PEREZ, JUAN"
+        nombres:
+          type: string
+          description: "Campo legacy. Cadena de texto vacía. No utilizado por la aplicación móvil. **Este campo no estará presente o estará vacío si `nro_afiliado` es `0`.**"
+          example: ""
+        cambiar_password:
+          type: integer
+          description: "Indicador numérico: 0 si no se requiere cambio de contraseña, 1 si el afiliado debe cambiar su contraseña al iniciar sesión. **Este campo no estará presente o será irrelevante si `nro_afiliado` es `0`.**"
+          enum: [0, 1]
+          example: 0
+        token:
+          type: string
+          description: "JSON Web Token (JWT) para la autenticación de peticiones posteriores. Solo presente si la autenticación fue exitosa (cuando `nro_afiliado` no es `0`). Debe ser incluido en el header 'Authorization' como 'Bearer <token>'."
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+        mensaje:
+          type: string
+          description: "Mensaje informativo, presente solo si `nro_afiliado` es `0` (credenciales incorrectas)."
+          example: "Datos incorrectos"
+      required:
+        - nro_afiliado
+
+    RecuperarPasswordRequest:
+      type: object
+      properties:
+        nroDocumento:
+          type: string
+          description: "Número de documento del afiliado (se espera un string, el sistema lo padeará a 8 dígitos con ceros a la izquierda)."
+          example: "12345678"
+        nroAfiliado:
+          type: integer
+          description: "Número de afiliado."
+          example: 54321
+        captcha:
+          type: string
+          description: "Código de seguridad de CAPTCHA ingresado por el usuario."
+          example: "abcde"
+      required:
+        - nroDocumento
+        - nroAfiliado
+        - captcha
+
+    RecuperarPasswordSuccessResponse:
+      type: object
+      properties:
+        estado:
+          type: string
+          description: "Estado de la operación. '1' indica éxito (email enviado)."
+          example: "1"
+        dominio_email:
+          type: string
+          description: "Dominio del email al que se envió el enlace de recuperación."
+          example: "ejemplo.com"
+      required:
+        - estado
+        - dominio_email
+
+    RecuperarPasswordEmailErrorResponse:
+      type: object
+      properties:
+        estado:
+          type: string
+          description: "Estado de la operación. '0' indica un error."
+          example: "0"
+        mensaje:
+          type: string
+          description: "Mensaje de error: No se pudo enviar el email."
+          example: "No se pudo enviar el email"
+      required:
+        - estado
+        - mensaje
+
+    RecuperarPasswordCaptchaErrorResponse:
+      type: object
+      properties:
+        estado:
+          type: string
+          description: "Estado de la operación. '0' indica un error."
+          example: "0"
+        mensaje:
+          type: string
+          description: "Mensaje de error: El código de captcha ingresado es incorrecto."
+          example: "El código ingresado no es correcto"
+      required:
+        - estado
+        - mensaje
+
+    RecuperarPasswordCGAErrorResponse:
+      type: object
+      properties:
+        id_recuperar_password:
+          type: integer
+          description: "Identificador de recuperación de contraseña. Será `0` si los datos del afiliado son incorrectos o no se pudo generar la URL."
+          example: 0
+        message:
+          type: string
+          description: "Mensaje de error desde la base de datos o lógica interna del CGA, si los datos del afiliado no son válidos para la recuperación."
+          example: "No se encontró un afiliado con los datos proporcionados."
+      required:
+        - id_recuperar_password
