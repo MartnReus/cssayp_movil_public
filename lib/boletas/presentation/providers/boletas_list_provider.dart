@@ -74,8 +74,11 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
     _buscarBoletasInicioPagadasUseCase = await ref.read(buscarBoletasInicioPagadasUseCaseProvider.future);
     _boletasLocalDataSource = ref.read(boletasLocalDataSourceProvider);
 
-    ref.listen<ConnectivityStatus>(connectivityProvider, (previous, next) {
-      _handleConnectivityChange(previous, next);
+    ref.listen(connectivityProvider, (previous, current) {
+      if (current.value == null || previous?.value == current.value) {
+        return;
+      }
+      _handleConnectivityChange(previous?.value, current.value!);
     });
 
     state = const AsyncValue.data(BoletasState());
@@ -87,7 +90,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
   Future<void> obtenerBoletasCreadas({int? page, bool forceRefresh = false}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      final isOnline = ref.read(connectivityProvider) == ConnectivityStatus.online;
+      final isOnline = ref.read(connectivityProvider).value == ConnectivityStatus.online;
       final currentPage = page ?? 1;
 
       if (!forceRefresh && !isOnline) {
@@ -103,6 +106,50 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
           if (currentPage == 1) {
             await _boletasLocalDataSource.guardarBoletas(boletas);
           }
+
+          return BoletasState(
+            boletas: boletas,
+            isLoading: false,
+            currentPage: response.currentPage,
+            lastPage: response.lastPage,
+            total: response.total,
+            perPage: response.perPage,
+            hasNextPage: response.nextPageUrl != null,
+            hasPreviousPage: response.prevPageUrl != null,
+            isOfflineData: false,
+            lastSyncTime: DateTime.now(),
+          );
+        } catch (e) {
+          final hasCache = await _boletasLocalDataSource.tieneBoletasEnCache();
+          if (hasCache) {
+            print('API failed, falling back to cache: $e');
+            return await _getFromLocalCache(page: currentPage);
+          }
+          rethrow;
+        }
+      } else {
+        return await _getFromLocalCache(page: currentPage);
+      }
+    });
+  }
+
+  /// Método específico para la pantalla de pagos que oculta las boletas pagadas
+  Future<void> obtenerBoletasParaPagar({int? page, bool forceRefresh = false}) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final isOnline = ref.read(connectivityProvider).value == ConnectivityStatus.online;
+      final currentPage = page ?? 1;
+
+      if (!forceRefresh && !isOnline) {
+        return await _getFromLocalCache(page: currentPage);
+      }
+
+      if (isOnline) {
+        try {
+          // Usar mostrarPagadas = 0 para ocultar boletas pagadas en la pantalla de pagos
+          final response = await _obtenerHistorialBoletasUseCase.execute(page: currentPage, mostrarPagadas: 0);
+
+          final boletas = response.boletas.map((boletaModel) => _convertirBoletaHistorialAEntity(boletaModel)).toList();
 
           return BoletasState(
             boletas: boletas,
@@ -160,6 +207,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
       caratula: model.caratula,
       fechaPago: model.fechaPago != null && model.fechaPago!.isNotEmpty ? _parseFechaImpresion(model.fechaPago!) : null,
       gastosAdministrativos: model.gastosAdministrativos != null ? double.tryParse(model.gastosAdministrativos!) : null,
+      estado: model.estado,
     );
   }
 
@@ -196,8 +244,10 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
 
     switch (idTipoBoleta) {
       case '1':
+      case '2':
       case '108':
         return BoletaTipo.inicio;
+      case '6':
       case '16':
       case '17':
       case '106':
@@ -207,14 +257,24 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
     }
   }
 
-  Future<BoletaEntity?> crearBoletaInicio({required String caratula, required double monto}) async {
+  Future<CrearBoletaInicioResult?> crearBoletaInicio({
+    required String caratula,
+    required String juzgado,
+    required CircunscripcionEntity circunscripcion,
+    required TipoJuicioEntity tipoJuicio,
+  }) async {
     state = const AsyncValue.loading();
     try {
-      final boleta = await _generarBoletaInicioUseCase.execute(caratula: caratula, monto: monto);
+      final resultado = await _generarBoletaInicioUseCase.execute(
+        caratula: caratula,
+        juzgado: juzgado,
+        circunscripcion: circunscripcion,
+        tipoJuicio: tipoJuicio,
+      );
 
       await refresh();
 
-      return boleta;
+      return resultado;
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
       rethrow;
@@ -296,7 +356,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
   }
 
   Future<void> syncCache() async {
-    final isOnline = ref.read(connectivityProvider) == ConnectivityStatus.online;
+    final isOnline = ref.read(connectivityProvider).value == ConnectivityStatus.online;
     if (!isOnline) return;
     await obtenerBoletasCreadas(page: 1, forceRefresh: true);
   }

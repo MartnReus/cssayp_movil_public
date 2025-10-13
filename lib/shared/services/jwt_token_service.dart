@@ -6,6 +6,10 @@ class JwtTokenService {
 
   JwtTokenService({required this.secureStorageDataSource});
 
+  Future<String?> obtenerToken() async {
+    return await secureStorageDataSource.obtenerToken();
+  }
+
   Future<String?> obtenerCampo(String campo) async {
     final payload = await _obtenerPayload();
     return payload?[campo]?.toString();

@@ -77,43 +77,74 @@ void main() {
 
     test('GenerarBoletaInicioUseCase debería ejecutarse correctamente', () async {
       // Arrange
-      final mockBoleta = BoletaEntity(
-        id: 1,
-        tipo: BoletaTipo.inicio,
-        monto: 100.0,
-        fechaImpresion: DateTime.now(),
-        fechaVencimiento: DateTime.now().add(const Duration(days: 30)),
-        codBarra: '123456',
-        caratula: 'Test Caratula',
-      );
+      final mockCircunscripcion = CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion');
+      final mockTipoJuicio = TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio');
+      final mockResult = CrearBoletaInicioResult(idBoleta: 1, urlPago: 'https://test.com');
 
       when(
-        mockGenerarBoletaInicioUseCase.execute(caratula: 'Test Caratula', monto: 100.0),
-      ).thenAnswer((_) async => mockBoleta);
+        mockGenerarBoletaInicioUseCase.execute(
+          caratula: 'Test Caratula',
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
+          juzgado: 'Test Juzgado',
+        ),
+      ).thenAnswer((_) async => mockResult);
 
       // Act
-      final result = await mockGenerarBoletaInicioUseCase.execute(caratula: 'Test Caratula', monto: 100.0);
+      final result = await mockGenerarBoletaInicioUseCase.execute(
+        caratula: 'Test Caratula',
+        circunscripcion: mockCircunscripcion,
+        tipoJuicio: mockTipoJuicio,
+        juzgado: 'Test Juzgado',
+      );
 
       // Assert
-      expect(result, mockBoleta);
-      expect(result.id, 1);
-      expect(result.tipo, BoletaTipo.inicio);
-      verify(mockGenerarBoletaInicioUseCase.execute(caratula: 'Test Caratula', monto: 100.0)).called(1);
+      expect(result, mockResult);
+      expect(result.idBoleta, 1);
+      expect(result.urlPago, 'https://test.com');
+      verify(
+        mockGenerarBoletaInicioUseCase.execute(
+          caratula: 'Test Caratula',
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
+          juzgado: 'Test Juzgado',
+        ),
+      ).called(1);
     });
 
     test('GenerarBoletaInicioUseCase debería manejar errores correctamente', () async {
       // Arrange
+      final mockCircunscripcion = CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion');
+      final mockTipoJuicio = TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio');
+
       when(
-        mockGenerarBoletaInicioUseCase.execute(caratula: 'Test Caratula', monto: 100.0),
+        mockGenerarBoletaInicioUseCase.execute(
+          caratula: 'Test Caratula',
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
+          juzgado: 'Test Juzgado',
+        ),
       ).thenThrow(Exception('Error al generar boleta'));
 
       // Act & Assert
       expect(
-        () => mockGenerarBoletaInicioUseCase.execute(caratula: 'Test Caratula', monto: 100.0),
+        () => mockGenerarBoletaInicioUseCase.execute(
+          caratula: 'Test Caratula',
+          circunscripcion: mockCircunscripcion,
+          tipoJuicio: mockTipoJuicio,
+          juzgado: 'Test Juzgado',
+        ),
         throwsA(isA<Exception>()),
       );
 
-      verify(mockGenerarBoletaInicioUseCase.execute(caratula: 'Test Caratula', monto: 100.0)).called(1);
+      verify(
+        mockGenerarBoletaInicioUseCase.execute(
+          caratula: 'Test Caratula',
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
+          juzgado: 'Test Juzgado',
+        ),
+      ).called(1);
     });
 
     test('GenerarBoletaFinalizacionUseCase debería ejecutarse correctamente', () async {

@@ -14,6 +14,7 @@ class BoletaEntity {
   // Estado de pago
   final DateTime? fechaPago; // FECHA_PAGO
   final double? importePago; // IMPORTE_PAGO
+  final String? estado; // ESTADO_PAGO
 
   // Información del juicio
   final String caratula; // CARATULA
@@ -39,6 +40,7 @@ class BoletaEntity {
     this.anioExpediente,
     this.cuij,
     this.gastosAdministrativos,
+    this.estado,
   });
 
   factory BoletaEntity.fromJson(Map<String, dynamic> json) {
@@ -62,6 +64,7 @@ class BoletaEntity {
       gastosAdministrativos: json['gastosAdministrativos'] != null
           ? double.tryParse(json['gastosAdministrativos'].toString())
           : null,
+      estado: json['estado'] ?? '',
     );
   }
 
@@ -90,6 +93,7 @@ class BoletaEntity {
       gastosAdministrativos: json['gastosAdministrativos'] != null
           ? double.tryParse(json['gastosAdministrativos'].toString())
           : null,
+      estado: json['estado'] ?? '',
     );
   }
 
@@ -109,10 +113,11 @@ class BoletaEntity {
       'anioExpediente': anioExpediente,
       'cuij': cuij,
       'gastosAdministrativos': gastosAdministrativos,
+      'estado': estado,
     };
   }
 
-  bool get estaPagada => fechaPago != null;
+  bool get estaPagada => fechaPago != null || estado == 'Para imputar';
 
   bool get estaVencida => DateTime.now().isAfter(fechaVencimiento);
 

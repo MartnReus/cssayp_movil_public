@@ -3,27 +3,16 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i8;
+import 'dart:async' as _i7;
 
 import 'package:cssayp_movil/auth/auth.dart' as _i3;
-import 'package:cssayp_movil/boletas/data/datasources/boletas_local_data_source.dart'
-    as _i12;
+import 'package:cssayp_movil/boletas/boletas.dart' as _i5;
 import 'package:cssayp_movil/boletas/data/models/historial_boletas_response_models.dart'
     as _i4;
 import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart'
     as _i6;
-import 'package:cssayp_movil/boletas/domain/entities/boleta_entity.dart' as _i5;
-import 'package:cssayp_movil/boletas/domain/entities/boleta_tipo.dart' as _i13;
 import 'package:cssayp_movil/boletas/domain/repositories/boletas_repository.dart'
     as _i2;
-import 'package:cssayp_movil/boletas/domain/usecases/buscar_boletas_inicio_pagadas_use_case.dart'
-    as _i11;
-import 'package:cssayp_movil/boletas/domain/usecases/generar_boleta_finalizacion_use_case.dart'
-    as _i10;
-import 'package:cssayp_movil/boletas/domain/usecases/generar_boleta_inicio_use_case.dart'
-    as _i9;
-import 'package:cssayp_movil/boletas/domain/usecases/obtener_historial_boletas_use_case.dart'
-    as _i7;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -60,14 +49,20 @@ class _FakeHistorialBoletasSuccessResponse_2 extends _i1.SmartFake
   ) : super(parent, parentInvocation);
 }
 
-class _FakeBoletaEntity_3 extends _i1.SmartFake implements _i5.BoletaEntity {
-  _FakeBoletaEntity_3(Object parent, Invocation parentInvocation)
+class _FakeCrearBoletaInicioResult_3 extends _i1.SmartFake
+    implements _i5.CrearBoletaInicioResult {
+  _FakeCrearBoletaInicioResult_3(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakePaginatedResponseModel_4 extends _i1.SmartFake
+class _FakeBoletaEntity_4 extends _i1.SmartFake implements _i5.BoletaEntity {
+  _FakeBoletaEntity_4(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakePaginatedResponseModel_5 extends _i1.SmartFake
     implements _i6.PaginatedResponseModel {
-  _FakePaginatedResponseModel_4(Object parent, Invocation parentInvocation)
+  _FakePaginatedResponseModel_5(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
@@ -75,7 +70,7 @@ class _FakePaginatedResponseModel_4 extends _i1.SmartFake
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockObtenerHistorialBoletasUseCase extends _i1.Mock
-    implements _i7.ObtenerHistorialBoletasUseCase {
+    implements _i5.ObtenerHistorialBoletasUseCase {
   @override
   _i2.BoletasRepository get boletasRepository =>
       (super.noSuchMethod(
@@ -107,31 +102,43 @@ class MockObtenerHistorialBoletasUseCase extends _i1.Mock
           as _i3.UsuarioRepository);
 
   @override
-  _i8.Future<_i4.HistorialBoletasSuccessResponse> execute({int? page}) =>
+  _i7.Future<_i4.HistorialBoletasSuccessResponse> execute({
+    int? page,
+    int? mostrarPagadas = 1,
+  }) =>
       (super.noSuchMethod(
-            Invocation.method(#execute, [], {#page: page}),
-            returnValue: _i8.Future<_i4.HistorialBoletasSuccessResponse>.value(
+            Invocation.method(#execute, [], {
+              #page: page,
+              #mostrarPagadas: mostrarPagadas,
+            }),
+            returnValue: _i7.Future<_i4.HistorialBoletasSuccessResponse>.value(
               _FakeHistorialBoletasSuccessResponse_2(
                 this,
-                Invocation.method(#execute, [], {#page: page}),
+                Invocation.method(#execute, [], {
+                  #page: page,
+                  #mostrarPagadas: mostrarPagadas,
+                }),
               ),
             ),
             returnValueForMissingStub:
-                _i8.Future<_i4.HistorialBoletasSuccessResponse>.value(
+                _i7.Future<_i4.HistorialBoletasSuccessResponse>.value(
                   _FakeHistorialBoletasSuccessResponse_2(
                     this,
-                    Invocation.method(#execute, [], {#page: page}),
+                    Invocation.method(#execute, [], {
+                      #page: page,
+                      #mostrarPagadas: mostrarPagadas,
+                    }),
                   ),
                 ),
           )
-          as _i8.Future<_i4.HistorialBoletasSuccessResponse>);
+          as _i7.Future<_i4.HistorialBoletasSuccessResponse>);
 }
 
 /// A class which mocks [GenerarBoletaInicioUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGenerarBoletaInicioUseCase extends _i1.Mock
-    implements _i9.GenerarBoletaInicioUseCase {
+    implements _i5.GenerarBoletaInicioUseCase {
   @override
   _i2.BoletasRepository get boletasRepository =>
       (super.noSuchMethod(
@@ -163,42 +170,51 @@ class MockGenerarBoletaInicioUseCase extends _i1.Mock
           as _i3.UsuarioRepository);
 
   @override
-  _i8.Future<_i5.BoletaEntity> execute({
+  _i7.Future<_i5.CrearBoletaInicioResult> execute({
     required String? caratula,
-    required double? monto,
+    required _i5.CircunscripcionEntity? circunscripcion,
+    required _i5.TipoJuicioEntity? tipoJuicio,
+    required String? juzgado,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#execute, [], {
               #caratula: caratula,
-              #monto: monto,
+              #circunscripcion: circunscripcion,
+              #tipoJuicio: tipoJuicio,
+              #juzgado: juzgado,
             }),
-            returnValue: _i8.Future<_i5.BoletaEntity>.value(
-              _FakeBoletaEntity_3(
+            returnValue: _i7.Future<_i5.CrearBoletaInicioResult>.value(
+              _FakeCrearBoletaInicioResult_3(
                 this,
                 Invocation.method(#execute, [], {
                   #caratula: caratula,
-                  #monto: monto,
+                  #circunscripcion: circunscripcion,
+                  #tipoJuicio: tipoJuicio,
+                  #juzgado: juzgado,
                 }),
               ),
             ),
-            returnValueForMissingStub: _i8.Future<_i5.BoletaEntity>.value(
-              _FakeBoletaEntity_3(
-                this,
-                Invocation.method(#execute, [], {
-                  #caratula: caratula,
-                  #monto: monto,
-                }),
-              ),
-            ),
+            returnValueForMissingStub:
+                _i7.Future<_i5.CrearBoletaInicioResult>.value(
+                  _FakeCrearBoletaInicioResult_3(
+                    this,
+                    Invocation.method(#execute, [], {
+                      #caratula: caratula,
+                      #circunscripcion: circunscripcion,
+                      #tipoJuicio: tipoJuicio,
+                      #juzgado: juzgado,
+                    }),
+                  ),
+                ),
           )
-          as _i8.Future<_i5.BoletaEntity>);
+          as _i7.Future<_i5.CrearBoletaInicioResult>);
 }
 
 /// A class which mocks [GenerarBoletaFinalizacionUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockGenerarBoletaFinalizacionUseCase extends _i1.Mock
-    implements _i10.GenerarBoletaFinalizacionUseCase {
+    implements _i5.GenerarBoletaFinalizacionUseCase {
   @override
   _i2.BoletasRepository get boletasRepository =>
       (super.noSuchMethod(
@@ -230,7 +246,7 @@ class MockGenerarBoletaFinalizacionUseCase extends _i1.Mock
           as _i3.UsuarioRepository);
 
   @override
-  _i8.Future<_i5.BoletaEntity> execute({
+  _i7.Future<_i5.BoletaEntity> execute({
     required int? idBoletaInicio,
     required double? monto,
     required DateTime? fechaRegulacion,
@@ -255,8 +271,8 @@ class MockGenerarBoletaFinalizacionUseCase extends _i1.Mock
               #anioExpediente: anioExpediente,
               #cuij: cuij,
             }),
-            returnValue: _i8.Future<_i5.BoletaEntity>.value(
-              _FakeBoletaEntity_3(
+            returnValue: _i7.Future<_i5.BoletaEntity>.value(
+              _FakeBoletaEntity_4(
                 this,
                 Invocation.method(#execute, [], {
                   #idBoletaInicio: idBoletaInicio,
@@ -272,8 +288,8 @@ class MockGenerarBoletaFinalizacionUseCase extends _i1.Mock
                 }),
               ),
             ),
-            returnValueForMissingStub: _i8.Future<_i5.BoletaEntity>.value(
-              _FakeBoletaEntity_3(
+            returnValueForMissingStub: _i7.Future<_i5.BoletaEntity>.value(
+              _FakeBoletaEntity_4(
                 this,
                 Invocation.method(#execute, [], {
                   #idBoletaInicio: idBoletaInicio,
@@ -290,14 +306,14 @@ class MockGenerarBoletaFinalizacionUseCase extends _i1.Mock
               ),
             ),
           )
-          as _i8.Future<_i5.BoletaEntity>);
+          as _i7.Future<_i5.BoletaEntity>);
 }
 
 /// A class which mocks [BuscarBoletasInicioPagadasUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBuscarBoletasInicioPagadasUseCase extends _i1.Mock
-    implements _i11.BuscarBoletasInicioPagadasUseCase {
+    implements _i5.BuscarBoletasInicioPagadasUseCase {
   @override
   _i2.BoletasRepository get boletasRepository =>
       (super.noSuchMethod(
@@ -329,7 +345,7 @@ class MockBuscarBoletasInicioPagadasUseCase extends _i1.Mock
           as _i3.UsuarioRepository);
 
   @override
-  _i8.Future<_i6.PaginatedResponseModel> execute({
+  _i7.Future<_i6.PaginatedResponseModel> execute({
     int? page = 1,
     String? caratulaBuscada,
   }) =>
@@ -338,8 +354,8 @@ class MockBuscarBoletasInicioPagadasUseCase extends _i1.Mock
               #page: page,
               #caratulaBuscada: caratulaBuscada,
             }),
-            returnValue: _i8.Future<_i6.PaginatedResponseModel>.value(
-              _FakePaginatedResponseModel_4(
+            returnValue: _i7.Future<_i6.PaginatedResponseModel>.value(
+              _FakePaginatedResponseModel_5(
                 this,
                 Invocation.method(#execute, [], {
                   #page: page,
@@ -348,8 +364,8 @@ class MockBuscarBoletasInicioPagadasUseCase extends _i1.Mock
               ),
             ),
             returnValueForMissingStub:
-                _i8.Future<_i6.PaginatedResponseModel>.value(
-                  _FakePaginatedResponseModel_4(
+                _i7.Future<_i6.PaginatedResponseModel>.value(
+                  _FakePaginatedResponseModel_5(
                     this,
                     Invocation.method(#execute, [], {
                       #page: page,
@@ -358,25 +374,25 @@ class MockBuscarBoletasInicioPagadasUseCase extends _i1.Mock
                   ),
                 ),
           )
-          as _i8.Future<_i6.PaginatedResponseModel>);
+          as _i7.Future<_i6.PaginatedResponseModel>);
 }
 
 /// A class which mocks [BoletasLocalDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBoletasLocalDataSource extends _i1.Mock
-    implements _i12.BoletasLocalDataSource {
+    implements _i5.BoletasLocalDataSource {
   @override
-  _i8.Future<void> guardarBoletas(List<_i5.BoletaEntity>? boletas) =>
+  _i7.Future<void> guardarBoletas(List<_i5.BoletaEntity>? boletas) =>
       (super.noSuchMethod(
             Invocation.method(#guardarBoletas, [boletas]),
-            returnValue: _i8.Future<void>.value(),
-            returnValueForMissingStub: _i8.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i8.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i8.Future<List<_i5.BoletaEntity>> obtenerBoletasLocales({
+  _i7.Future<List<_i5.BoletaEntity>> obtenerBoletasLocales({
     int? limit,
     int? offset,
     String? caratulaFiltro,
@@ -387,52 +403,52 @@ class MockBoletasLocalDataSource extends _i1.Mock
               #offset: offset,
               #caratulaFiltro: caratulaFiltro,
             }),
-            returnValue: _i8.Future<List<_i5.BoletaEntity>>.value(
+            returnValue: _i7.Future<List<_i5.BoletaEntity>>.value(
               <_i5.BoletaEntity>[],
             ),
-            returnValueForMissingStub: _i8.Future<List<_i5.BoletaEntity>>.value(
+            returnValueForMissingStub: _i7.Future<List<_i5.BoletaEntity>>.value(
               <_i5.BoletaEntity>[],
             ),
           )
-          as _i8.Future<List<_i5.BoletaEntity>>);
+          as _i7.Future<List<_i5.BoletaEntity>>);
 
   @override
-  _i8.Future<int> obtenerConteoBoletasLocales({String? caratulaFiltro}) =>
+  _i7.Future<int> obtenerConteoBoletasLocales({String? caratulaFiltro}) =>
       (super.noSuchMethod(
             Invocation.method(#obtenerConteoBoletasLocales, [], {
               #caratulaFiltro: caratulaFiltro,
             }),
-            returnValue: _i8.Future<int>.value(0),
-            returnValueForMissingStub: _i8.Future<int>.value(0),
+            returnValue: _i7.Future<int>.value(0),
+            returnValueForMissingStub: _i7.Future<int>.value(0),
           )
-          as _i8.Future<int>);
+          as _i7.Future<int>);
 
   @override
-  _i8.Future<void> limpiarCache() =>
+  _i7.Future<void> limpiarCache() =>
       (super.noSuchMethod(
             Invocation.method(#limpiarCache, []),
-            returnValue: _i8.Future<void>.value(),
-            returnValueForMissingStub: _i8.Future<void>.value(),
+            returnValue: _i7.Future<void>.value(),
+            returnValueForMissingStub: _i7.Future<void>.value(),
           )
-          as _i8.Future<void>);
+          as _i7.Future<void>);
 
   @override
-  _i8.Future<DateTime?> obtenerUltimaSincronizacion() =>
+  _i7.Future<DateTime?> obtenerUltimaSincronizacion() =>
       (super.noSuchMethod(
             Invocation.method(#obtenerUltimaSincronizacion, []),
-            returnValue: _i8.Future<DateTime?>.value(),
-            returnValueForMissingStub: _i8.Future<DateTime?>.value(),
+            returnValue: _i7.Future<DateTime?>.value(),
+            returnValueForMissingStub: _i7.Future<DateTime?>.value(),
           )
-          as _i8.Future<DateTime?>);
+          as _i7.Future<DateTime?>);
 
   @override
-  _i8.Future<bool> tieneBoletasEnCache() =>
+  _i7.Future<bool> tieneBoletasEnCache() =>
       (super.noSuchMethod(
             Invocation.method(#tieneBoletasEnCache, []),
-            returnValue: _i8.Future<bool>.value(false),
-            returnValueForMissingStub: _i8.Future<bool>.value(false),
+            returnValue: _i7.Future<bool>.value(false),
+            returnValueForMissingStub: _i7.Future<bool>.value(false),
           )
-          as _i8.Future<bool>);
+          as _i7.Future<bool>);
 
   @override
   Map<String, dynamic> boletaToMap(_i5.BoletaEntity? boleta) =>
@@ -447,11 +463,11 @@ class MockBoletasLocalDataSource extends _i1.Mock
   _i5.BoletaEntity mapToBoleta(Map<String, dynamic>? map) =>
       (super.noSuchMethod(
             Invocation.method(#mapToBoleta, [map]),
-            returnValue: _FakeBoletaEntity_3(
+            returnValue: _FakeBoletaEntity_4(
               this,
               Invocation.method(#mapToBoleta, [map]),
             ),
-            returnValueForMissingStub: _FakeBoletaEntity_3(
+            returnValueForMissingStub: _FakeBoletaEntity_4(
               this,
               Invocation.method(#mapToBoleta, [map]),
             ),
@@ -459,11 +475,11 @@ class MockBoletasLocalDataSource extends _i1.Mock
           as _i5.BoletaEntity);
 
   @override
-  _i13.BoletaTipo stringToBoletaTipo(String? tipo) =>
+  _i5.BoletaTipo stringToBoletaTipo(String? tipo) =>
       (super.noSuchMethod(
             Invocation.method(#stringToBoletaTipo, [tipo]),
-            returnValue: _i13.BoletaTipo.inicio,
-            returnValueForMissingStub: _i13.BoletaTipo.inicio,
+            returnValue: _i5.BoletaTipo.inicio,
+            returnValueForMissingStub: _i5.BoletaTipo.inicio,
           )
-          as _i13.BoletaTipo);
+          as _i5.BoletaTipo);
 }

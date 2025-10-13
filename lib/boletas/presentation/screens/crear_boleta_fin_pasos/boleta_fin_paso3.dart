@@ -222,7 +222,12 @@ class Paso3BoletaFinScreen extends ConsumerWidget {
                     if (boleta != null && context.mounted) {
                       ref.read(boletaFinDataProvider.notifier).reset();
 
-                      Navigator.pushNamedAndRemoveUntil(context, '/boleta-generada', (route) => false);
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/boleta-generada',
+                        (route) => false,
+                        arguments: boleta,
+                      );
                     }
                   } catch (e) {
                     if (context.mounted) {

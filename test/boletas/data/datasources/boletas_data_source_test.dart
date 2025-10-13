@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cssayp_movil/boletas/data/datasources/boletas_data_source.dart';
-import 'package:cssayp_movil/boletas/data/models/crear_boleta_response_models.dart';
-import 'package:cssayp_movil/boletas/data/models/historial_boletas_response_models.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart';
 import 'package:cssayp_movil/config.dart';
 import 'package:http/http.dart' as http;
@@ -20,9 +18,6 @@ void main() {
     late BoletasDataSource boletasDataSource;
     late MockClient mockClient;
 
-    final consultaApiURL = "${AppConfig.consultaApiURL}/api/v1/boletaInicio";
-    final requestHeaders = {'Content-Type': 'application/json', 'Accept': 'application/json'};
-
     setUp(() {
       mockClient = MockClient();
       boletasDataSource = BoletasDataSource(client: mockClient);
@@ -30,58 +25,56 @@ void main() {
 
     test("crearBoletaInicio debe retornar un CrearBoletaSuccessResponse si los datos son correctos", () async {
       final requestBody = json.encode({
-        'nro_afiliado': 12345,
+        'aporteVoluntario': 'N',
         'caratula': 'Test Caratula',
-        'monto': 1000.50,
-        'digito': '1',
+        'circunscripcion': ['1', 'Test Circunscripcion'],
+        'juzgado': 'Test Juzgado',
+        'tipoJuicio': ['1', 'Test Tipo Juicio'],
+        'tipoPago': 4,
       });
 
       // Respuesta que devuelve el endpoint
-      final successResponseBody = json.encode({
-        'id_boleta_generada': '123',
-        'id_tipo_boleta': '1',
-        'cod_barra': '12345678901234567890',
-        'caratula': 'Test Caratula',
-        'fecha_impresion': '2024-01-15',
-        'dias_vencimiento': '30',
-        'id_boleta_asociada': null,
-        'fecha_pago': null,
-        'importe_pago': null,
-        'gastos_administrativos': null,
-        'monto_entero': '1000',
-        'monto_decimal': '50',
-      });
-      const successResponseStatus = 201;
+      final successResponseBody = json.encode({'id_boleta_generada': '123', 'url': 'https://example.com/payment'});
+      const successResponseStatus = 200;
 
       when(
         mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers')),
       ).thenAnswer((_) async => http.Response(successResponseBody, successResponseStatus));
 
       final result = await boletasDataSource.crearBoletaInicio(
-        nroAfiliado: 12345,
+        token: 'test-token',
         caratula: 'Test Caratula',
-        monto: 1000.50,
-        digito: '1',
+        juzgado: 'Test Juzgado',
+        circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+        tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
       );
 
       expect(result, isA<CrearBoletaSuccessResponse>());
-      expect((result as CrearBoletaSuccessResponse).statusCode, equals(201));
+      expect((result as CrearBoletaSuccessResponse).statusCode, equals(200));
       expect((result).idBoleta, equals(123));
-      expect((result).idTipoBoleta, equals(1));
-      expect((result).codBarra, equals('12345678901234567890'));
-      expect((result).caratula, equals('Test Caratula'));
-      expect((result).fechaImpresion, equals('2024-01-15'));
-      expect((result).diasVencimiento, equals('30'));
+      expect((result).urlPago, equals('https://example.com/payment'));
 
-      verify(mockClient.post(Uri.parse(consultaApiURL), body: requestBody, headers: requestHeaders)).called(1);
+      verify(
+        mockClient.post(
+          Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+          body: requestBody,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer test-token',
+          },
+        ),
+      ).called(1);
     });
 
     test("crearBoletaInicio debe retornar un CrearBoletaGenericErrorResponse si hay error en el servidor", () async {
       final requestBody = json.encode({
-        'nro_afiliado': 12345,
+        'aporteVoluntario': 'N',
         'caratula': 'Test Caratula',
-        'monto': 1000.50,
-        'digito': '1',
+        'circunscripcion': ['1', 'Test Circunscripcion'],
+        'juzgado': 'Test Juzgado',
+        'tipoJuicio': ['1', 'Test Tipo Juicio'],
+        'tipoPago': 4,
       });
 
       // Respuesta de error del endpoint
@@ -93,31 +86,46 @@ void main() {
       ).thenAnswer((_) async => http.Response(errorResponseBody, errorResponseStatus));
 
       final result = await boletasDataSource.crearBoletaInicio(
-        nroAfiliado: 12345,
+        token: 'test-token',
         caratula: 'Test Caratula',
-        monto: 1000.50,
-        digito: '1',
+        juzgado: 'Test Juzgado',
+        circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+        tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
       );
 
       expect(result, isA<CrearBoletaGenericErrorResponse>());
       expect((result as CrearBoletaGenericErrorResponse).statusCode, equals(400));
       expect((result).errorMessage, equals('Error al crear la boleta de inicio'));
 
-      verify(mockClient.post(Uri.parse(consultaApiURL), body: requestBody, headers: requestHeaders)).called(1);
+      verify(
+        mockClient.post(
+          Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+          body: requestBody,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer test-token',
+          },
+        ),
+      ).called(1);
     });
 
     test("crearBoletaInicio debe retornar un CrearBoletaGenericErrorResponse cuando hay timeout de conexión", () async {
       final requestBodyTimeoutException = json.encode({
-        'nro_afiliado': 12345,
+        'aporteVoluntario': 'N',
         'caratula': 'Test Timeout',
-        'monto': 1000.50,
-        'digito': '1',
+        'circunscripcion': ['1', 'Test Circunscripcion'],
+        'juzgado': 'Test Juzgado',
+        'tipoJuicio': ['1', 'Test Tipo Juicio'],
+        'tipoPago': 4,
       });
       final requestBodySocketException = json.encode({
-        'nro_afiliado': 12345,
+        'aporteVoluntario': 'N',
         'caratula': 'Test Socket',
-        'monto': 1000.50,
-        'digito': '1',
+        'circunscripcion': ['1', 'Test Circunscripcion'],
+        'juzgado': 'Test Juzgado',
+        'tipoJuicio': ['1', 'Test Tipo Juicio'],
+        'tipoPago': 4,
       });
 
       when(
@@ -128,16 +136,18 @@ void main() {
       ).thenThrow(SocketException('Connection timeout'));
 
       final resultTimeoutException = await boletasDataSource.crearBoletaInicio(
-        nroAfiliado: 12345,
+        token: 'test-token',
         caratula: 'Test Timeout',
-        monto: 1000.50,
-        digito: '1',
+        juzgado: 'Test Juzgado',
+        circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+        tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
       );
       final resultSocketException = await boletasDataSource.crearBoletaInicio(
-        nroAfiliado: 12345,
+        token: 'test-token',
         caratula: 'Test Socket',
-        monto: 1000.50,
-        digito: '1',
+        juzgado: 'Test Juzgado',
+        circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+        tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
       );
 
       expect(resultTimeoutException, isA<CrearBoletaGenericErrorResponse>());
@@ -148,10 +158,26 @@ void main() {
       expect((resultSocketException).errorMessage, equals('Error en la conexión con el servidor'));
 
       verify(
-        mockClient.post(Uri.parse(consultaApiURL), body: requestBodyTimeoutException, headers: requestHeaders),
+        mockClient.post(
+          Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+          body: requestBodyTimeoutException,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer test-token',
+          },
+        ),
       ).called(1);
       verify(
-        mockClient.post(Uri.parse(consultaApiURL), body: requestBodySocketException, headers: requestHeaders),
+        mockClient.post(
+          Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+          body: requestBodySocketException,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer test-token',
+          },
+        ),
       ).called(1);
     });
 
@@ -159,10 +185,12 @@ void main() {
       "crearBoletaInicio debe retornar un CrearBoletaGenericErrorResponse cuando el servidor devuelve HTML",
       () async {
         final requestBody = json.encode({
-          'nro_afiliado': 12345,
+          'aporteVoluntario': 'N',
           'caratula': 'Test Caratula',
-          'monto': 1000.50,
-          'digito': '1',
+          'circunscripcion': ['1', 'Test Circunscripcion'],
+          'juzgado': 'Test Juzgado',
+          'tipoJuicio': ['1', 'Test Tipo Juicio'],
+          'tipoPago': 4,
         });
         const errorResponseStatus = 500;
         const errorResponseBody = '''
@@ -181,26 +209,39 @@ void main() {
         );
 
         final result = await boletasDataSource.crearBoletaInicio(
-          nroAfiliado: 12345,
+          token: 'test-token',
           caratula: 'Test Caratula',
-          monto: 1000.50,
-          digito: '1',
+          juzgado: 'Test Juzgado',
+          circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+          tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
         );
 
         expect(result, isA<CrearBoletaGenericErrorResponse>());
         expect((result as CrearBoletaGenericErrorResponse).statusCode, equals(500));
         expect((result).errorMessage, equals('Error del servidor, intente nuevamente más tarde'));
 
-        verify(mockClient.post(Uri.parse(consultaApiURL), body: requestBody, headers: requestHeaders)).called(1);
+        verify(
+          mockClient.post(
+            Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+            body: requestBody,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer test-token',
+            },
+          ),
+        ).called(1);
       },
     );
 
     test("crearBoletaInicio debe retornar un CrearBoletaGenericErrorResponse cuando hay FormatException", () async {
       final requestBody = json.encode({
-        'nro_afiliado': 12345,
+        'aporteVoluntario': 'N',
         'caratula': 'Test Caratula',
-        'monto': 1000.50,
-        'digito': '1',
+        'circunscripcion': ['1', 'Test Circunscripcion'],
+        'juzgado': 'Test Juzgado',
+        'tipoJuicio': ['1', 'Test Tipo Juicio'],
+        'tipoPago': 4,
       });
 
       when(
@@ -208,27 +249,40 @@ void main() {
       ).thenThrow(FormatException('Invalid JSON'));
 
       final result = await boletasDataSource.crearBoletaInicio(
-        nroAfiliado: 12345,
+        token: 'test-token',
         caratula: 'Test Caratula',
-        monto: 1000.50,
-        digito: '1',
+        juzgado: 'Test Juzgado',
+        circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+        tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
       );
 
       expect(result, isA<CrearBoletaGenericErrorResponse>());
       expect((result as CrearBoletaGenericErrorResponse).statusCode, equals(500));
       expect((result).errorMessage, equals('Error del servidor, intente nuevamente más tarde'));
 
-      verify(mockClient.post(Uri.parse(consultaApiURL), body: requestBody, headers: requestHeaders)).called(1);
+      verify(
+        mockClient.post(
+          Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+          body: requestBody,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer test-token',
+          },
+        ),
+      ).called(1);
     });
 
     test(
       "crearBoletaInicio debe retornar un CrearBoletaGenericErrorResponse cuando hay una excepción genérica",
       () async {
         final requestBody = json.encode({
-          'nro_afiliado': 12345,
+          'aporteVoluntario': 'N',
           'caratula': 'Test Caratula',
-          'monto': 1000.50,
-          'digito': '1',
+          'circunscripcion': ['1', 'Test Circunscripcion'],
+          'juzgado': 'Test Juzgado',
+          'tipoJuicio': ['1', 'Test Tipo Juicio'],
+          'tipoPago': 4,
         });
 
         when(
@@ -236,17 +290,28 @@ void main() {
         ).thenThrow(Exception('Unexpected error'));
 
         final result = await boletasDataSource.crearBoletaInicio(
-          nroAfiliado: 12345,
+          token: 'test-token',
           caratula: 'Test Caratula',
-          monto: 1000.50,
-          digito: '1',
+          juzgado: 'Test Juzgado',
+          circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+          tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
         );
 
         expect(result, isA<CrearBoletaGenericErrorResponse>());
         expect((result as CrearBoletaGenericErrorResponse).statusCode, equals(0));
         expect((result).errorMessage, equals('Error inesperado al crear boleta de inicio'));
 
-        verify(mockClient.post(Uri.parse(consultaApiURL), body: requestBody, headers: requestHeaders)).called(1);
+        verify(
+          mockClient.post(
+            Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+            body: requestBody,
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer test-token',
+            },
+          ),
+        ).called(1);
       },
     );
   });
@@ -281,20 +346,7 @@ void main() {
       });
 
       // Respuesta que devuelve el endpoint
-      final successResponseBody = json.encode({
-        'id_boleta_generada': '124',
-        'id_tipo_boleta': '2',
-        'cod_barra': '12345678901234567891',
-        'caratula': 'Test Caratula Finalizacion',
-        'fecha_impresion': '2024-01-15',
-        'dias_vencimiento': '30',
-        'id_boleta_asociada': 123,
-        'fecha_pago': null,
-        'importe_pago': null,
-        'gastos_administrativos': null,
-        'monto_entero': '2000',
-        'monto_decimal': '75',
-      });
+      final successResponseBody = json.encode({'id_boleta_generada': '124', 'url': 'https://example.com/payment'});
       const successResponseStatus = 201;
 
       when(
@@ -319,10 +371,7 @@ void main() {
       expect(result, isA<CrearBoletaSuccessResponse>());
       expect((result as CrearBoletaSuccessResponse).statusCode, equals(201));
       expect((result).idBoleta, equals(124));
-      expect((result).idTipoBoleta, equals(2));
-      expect((result).codBarra, equals('12345678901234567891'));
-      expect((result).caratula, equals('Test Caratula Finalizacion'));
-      expect((result).idBoletaAsociada, equals(123));
+      expect((result).urlPago, equals('https://example.com/payment'));
 
       verify(mockClient.post(Uri.parse(consultaApiURL), body: requestBody, headers: requestHeaders)).called(1);
     });
@@ -797,6 +846,14 @@ void main() {
 
     test("crearBoletaInicio debe manejar diferentes códigos de estado de respuesta", () async {
       // Test with 500 status code
+      final requestBody = json.encode({
+        'aporteVoluntario': 'N',
+        'caratula': 'Test Caratula',
+        'circunscripcion': ['1', 'Test Circunscripcion'],
+        'juzgado': 'Test Juzgado',
+        'tipoJuicio': ['1', 'Test Tipo Juicio'],
+        'tipoPago': 4,
+      });
       final errorResponseBody = json.encode({'errorMessage': 'Internal server error'});
       const errorResponseStatus = 500;
 
@@ -805,15 +862,28 @@ void main() {
       ).thenAnswer((_) async => http.Response(errorResponseBody, errorResponseStatus));
 
       final result = await boletasDataSource.crearBoletaInicio(
-        nroAfiliado: 12345,
+        token: 'test-token',
         caratula: 'Test Caratula',
-        monto: 1000.50,
-        digito: '1',
+        juzgado: 'Test Juzgado',
+        circunscripcion: CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion'),
+        tipoJuicio: TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio'),
       );
 
       expect(result, isA<CrearBoletaGenericErrorResponse>());
       expect((result as CrearBoletaGenericErrorResponse).statusCode, equals(500));
       expect((result).errorMessage, equals('Internal server error'));
+
+      verify(
+        mockClient.post(
+          Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+          body: requestBody,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer test-token',
+          },
+        ),
+      ).called(1);
     });
 
     test("obtenerHistorialBoletas debe manejar respuesta con página específica", () async {

@@ -63,12 +63,10 @@ class Paso3BoletaInicioScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Contenido de las tarjetas
-                    _buildCard("Carátula", [_buildCaratula(boletaData)]),
+                    _buildCard("Carátula", [_buildCaratula(boletaData.value!)]),
                     const SizedBox(height: 12),
                     _buildCard("Montos y fechas", [
-                      _buildDato("Caja", "\$7000"),
-                      _buildDato("Caja Forense", "\$7000"),
-                      _buildDato("Colegio", "\$7000"),
+                      _buildMontosDatos(boletaData.value!),
                       _buildDato("Fecha de Impresión", _formatFechaImpresion()),
                       _buildDato("Fecha de Vencimiento", _formatFechaVencimiento()),
                     ]),
@@ -81,7 +79,7 @@ class Paso3BoletaInicioScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildNavigationButtons(context, ref, boletaData, boletasState),
+      bottomNavigationBar: _buildNavigationButtons(context, ref, boletaData.value!, boletasState),
     );
   }
 
@@ -198,18 +196,50 @@ class Paso3BoletaInicioScreen extends ConsumerWidget {
 
                   try {
                     final caratula = _buildCaratulaString(boletaData);
+                    final juzgado = boletaData.juzgado;
+                    final circunscripcion = boletaData.circunscripcion;
+                    final tipoJuicio = boletaData.tipoJuicio;
 
-                    const montoTotal = 7000.0 + 7000.0 + 7000.0; // Caja + Caja Forense + Colegio
+                    if (circunscripcion == null || tipoJuicio == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('El tipo de juicio y la circunscripción deben ser seleccionados'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
 
-                    final boleta = await ref
+                    if (juzgado == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('El juzgado no puede estar vacío'), backgroundColor: Colors.red),
+                      );
+                      return;
+                    }
+
+                    final resultado = await ref
                         .read(boletasProvider.notifier)
-                        .crearBoletaInicio(caratula: caratula, monto: montoTotal);
+                        .crearBoletaInicio(
+                          caratula: caratula,
+                          juzgado: juzgado,
+                          circunscripcion: circunscripcion,
+                          tipoJuicio: tipoJuicio,
+                        );
 
-                    if (boleta != null && context.mounted) {
+                    if (resultado != null && context.mounted) {
                       // Limpiar los datos después de crear la boleta exitosamente
                       ref.read(boletaInicioDataProvider.notifier).reset();
 
-                      Navigator.pushNamedAndRemoveUntil(context, '/boleta-generada', (route) => false);
+                      // Obtener la boleta creada del provider
+                      final boletasState = ref.read(boletasProvider);
+                      final boletaCreada = boletasState.value?.boletas.firstWhere((b) => b.id == resultado.idBoleta);
+
+                      Navigator.pushNamedAndRemoveUntil(
+                        context,
+                        '/boleta-generada',
+                        (route) => false,
+                        arguments: boletaCreada,
+                      );
                     }
                   } catch (e) {
                     if (context.mounted) {
@@ -280,29 +310,28 @@ class Paso3BoletaInicioScreen extends ConsumerWidget {
   Widget _buildDato(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: "$label: ",
-              style: const TextStyle(
-                fontFamily: "Montserrat",
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF111112),
-              ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "$label:",
+            style: const TextStyle(
+              fontFamily: "Montserrat",
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF111112),
             ),
-            TextSpan(
-              text: value,
-              style: const TextStyle(
-                fontFamily: "Montserrat",
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF111112),
-              ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: "Montserrat",
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF111112),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -344,5 +373,33 @@ class Paso3BoletaInicioScreen extends ConsumerWidget {
     final causa = boletaData.causa ?? "NO ESPECIFICADA";
 
     return "${actor.toUpperCase()} C/ ${demandado.toUpperCase()} S/ ${causa.toUpperCase()}";
+  }
+
+  MontosEntity? _obtenerMontosDesdeTipoJuicio(BoletaInicioDataState boletaData) {
+    if (boletaData.tipoJuicio == null) return null;
+
+    return boletaData.tipoJuicio!.montos;
+  }
+
+  Widget _buildMontosDatos(BoletaInicioDataState boletaData) {
+    final montos = _obtenerMontosDesdeTipoJuicio(boletaData);
+
+    if (montos == null) {
+      return Column(
+        children: [
+          _buildDato("Caja", "No disponible"),
+          _buildDato("Caja Forense", "No disponible"),
+          _buildDato("Colegio", "No disponible"),
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        _buildDato("Caja", "\$${montos.montoCaja.toStringAsFixed(0)}"),
+        _buildDato("Caja Forense", "\$${montos.montoForense.toStringAsFixed(0)}"),
+        _buildDato("Colegio", "\$${montos.montoColegio.toStringAsFixed(0)}"),
+      ],
+    );
   }
 }

@@ -1,9 +1,11 @@
-## Pruebas de Integración
+# Pruebas de Integración
 
-### Objetivo
+## Objetivo
+
 El objetivo principal de las pruebas de integración es validar el funcionamiento completo de la aplicación en un entorno que simula el comportamiento real del usuario. Estas pruebas verifican la interacción entre diferentes módulos, la navegación entre pantallas, la integración con servicios externos y el flujo completo de las funcionalidades principales.
 
-### Herramientas utilizadas
+## Herramientas utilizadas
+
 Para la implementación de las pruebas de integración se utilizaron las siguientes herramientas:
 
 - `integration_test`: Framework oficial de Flutter para pruebas de integración que permite probar la aplicación completa en un dispositivo real o emulador, simulando interacciones del usuario real.
@@ -13,16 +15,18 @@ Para la implementación de las pruebas de integración se utilizaron las siguien
 
 El uso combinado de estas herramientas permite simular flujos completos de usuario, validar la integración entre componentes y asegurar que la aplicación funciona correctamente en condiciones reales.
 
-### Alcance
+## Alcance
 
-#### Total de Pruebas por Funcionalidad
+### Total de Pruebas por Funcionalidad
+
 - **Estado Inicial y Navegación:** 4 pruebas
 - **Creación de Boletas de Inicio:** 8 pruebas
 - **Creación de Boletas de Finalización:** 10 pruebas
 - **Historial de Boletas:** 8 pruebas
 - **Total:** 30 pruebas de integración
 
-#### Funcionalidades Cubiertas
+### Funcionalidades Cubiertas
+
 - Navegación inicial y autenticación
 - Flujo completo de creación de boletas de inicio
 - Flujo completo de creación de boletas de finalización
@@ -32,7 +36,8 @@ El uso combinado de estas herramientas permite simular flujos completos de usuar
 - Navegación entre pantallas y pasos
 - Confirmaciones y cancelaciones de operaciones
 
-#### Casos de Error Cubiertos
+### Casos de Error Cubiertos
+
 - Errores de validación en formularios
 - Errores de conexión con el servidor
 - Errores de respuesta del servidor
@@ -41,9 +46,10 @@ El uso combinado de estas herramientas permite simular flujos completos de usuar
 - Cancelaciones de operaciones
 - Navegación incorrecta entre pasos
 
-### Detalles por Funcionalidad
+## Detalles por Funcionalidad
 
-#### Estado Inicial y Navegación (4 pruebas)
+### Estado Inicial y Navegación (4 pruebas)
+
 **Archivo:** `estado_inicial_test.dart`
 
 - **Navegación desde SplashScreen:** Verifica que la pantalla de carga se muestre correctamente durante la inicialización
@@ -51,7 +57,8 @@ El uso combinado de estas herramientas permite simular flujos completos de usuar
 - **Navegación a Home con token válido:** Confirma que usuarios autenticados accedan directamente al home
 - **Navegación con biometría habilitada:** Verifica el flujo cuando la autenticación biométrica está activa
 
-#### Creación de Boletas de Inicio (8 pruebas)
+### Creación de Boletas de Inicio (8 pruebas)
+
 **Archivo:** `crear_boleta_inicio_flow_test.dart`
 
 - **Flujo completo exitoso:** Valida todo el proceso desde la selección hasta la generación exitosa
@@ -63,7 +70,8 @@ El uso combinado de estas herramientas permite simular flujos completos de usuar
 - **Navegación entre pasos:** Verifica que los botones "Volver" funcionen correctamente
 - **Cancelación de operación:** Valida que se pueda cancelar la generación de boletas
 
-#### Creación de Boletas de Finalización (10 pruebas)
+### Creación de Boletas de Finalización (10 pruebas)
+
 **Archivo:** `crear_boleta_fin_flow_test.dart` y `crear_boleta_fin_flow_simple_test.dart`
 
 - **Flujo completo exitoso:** Valida todo el proceso desde la selección de carátula hasta la generación
@@ -77,7 +85,8 @@ El uso combinado de estas herramientas permite simular flujos completos de usuar
 - **Cancelación de operación:** Valida la cancelación en el diálogo de confirmación
 - **Flujo simplificado:** Prueba un flujo básico de navegación entre pasos
 
-#### Historial de Boletas (8 pruebas)
+### Historial de Boletas (8 pruebas)
+
 **Archivo:** `historial_boletas_flow_test.dart`
 
 - **Navegación y carga de lista:** Verifica que se muestre correctamente el historial de boletas
@@ -89,28 +98,32 @@ El uso combinado de estas herramientas permite simular flujos completos de usuar
 - **Pull-to-refresh:** Verifica la funcionalidad de actualización manual
 - **Información de boletas:** Confirma que se muestren correctamente los datos de las boletas
 
-### Características Técnicas
+## Características Técnicas
 
-#### Simulación de Servicios
+### Simulación de Servicios
+
 - **Mock de HTTP Client:** Simula respuestas de API con diferentes escenarios (éxito, error, timeout)
 - **Mock de Almacenamiento:** Simula el almacenamiento seguro de tokens y preferencias
 - **Mock de JWT Service:** Simula la extracción de datos del token de autenticación
 - **Mock de Repositorios:** Simula el comportamiento de repositorios de datos
 
-#### Datos de Prueba
+### Datos de Prueba
+
 - **Tokens JWT válidos:** Generados dinámicamente con datos de prueba
 - **Respuestas de API:** Simuladas con datos realistas de boletas y usuarios
 - **Estados de autenticación:** Diferentes escenarios de usuario autenticado/no autenticado
 - **Configuraciones de biometría:** Pruebas con biometría habilitada y deshabilitada
 
-#### Validaciones de UI
+### Validaciones de UI
+
 - **Presencia de widgets:** Verificación de que los elementos correctos estén visibles
 - **Navegación entre pantallas:** Confirmación de transiciones correctas
 - **Mensajes de error:** Validación de que se muestren los mensajes apropiados
 - **Estados de carga:** Verificación de indicadores de progreso
 - **Interacciones de usuario:** Simulación de toques, escritura y selecciones
 
-### Resultados
+## Resultados
+
 Las pruebas de integración del módulo de boletas proporcionan una validación completa del funcionamiento end-to-end, incluyendo:
 
 - Verificación exhaustiva de flujos completos de usuario desde el login hasta la generación de boletas.

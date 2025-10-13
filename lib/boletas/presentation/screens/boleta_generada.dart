@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/pagos/pagos.dart';
 
 class BoletaCreadaScreen extends ConsumerStatefulWidget {
-  const BoletaCreadaScreen({super.key});
+  final BoletaEntity? boleta;
+
+  const BoletaCreadaScreen({super.key, this.boleta});
 
   @override
   ConsumerState<BoletaCreadaScreen> createState() => _BoletaCreadaScreen();
@@ -12,6 +16,7 @@ class BoletaCreadaScreen extends ConsumerStatefulWidget {
 class _BoletaCreadaScreen extends ConsumerState<BoletaCreadaScreen> {
   @override
   Widget build(BuildContext context) {
+    final boleta = widget.boleta ?? ModalRoute.of(context)?.settings.arguments as BoletaEntity?;
     return Scaffold(
       backgroundColor: const Color(0xFFEEF9FF),
       body: SafeArea(
@@ -64,9 +69,14 @@ class _BoletaCreadaScreen extends ConsumerState<BoletaCreadaScreen> {
                             backgroundColor: const Color(0xFF173664),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
-                          onPressed: () {
-                            _showComingSoonDialog(context, 'Pago de Boletas');
-                          },
+                          onPressed: boleta != null
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => ProcesarPagoScreen(boletas: [boleta])),
+                                  );
+                                }
+                              : null,
                           child: const Text(
                             'Pagar boleta',
                             style: TextStyle(
@@ -115,32 +125,6 @@ class _BoletaCreadaScreen extends ConsumerState<BoletaCreadaScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showComingSoonDialog(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          feature,
-          style: const TextStyle(color: Color(0xFF4D4D4D), fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
-        ),
-        content: const Text(
-          'Esta funcionalidad estará disponible próximamente.',
-          style: TextStyle(color: Color(0xFF4D4D4D), fontFamily: 'Inter'),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4D4D4D),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Entendido', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
     );
   }

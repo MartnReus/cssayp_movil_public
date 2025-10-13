@@ -3,24 +3,20 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i6;
+import 'dart:async' as _i4;
 
 import 'package:cssayp_movil/auth/data/models/cambiar_password_response_models.dart'
-    as _i11;
-import 'package:cssayp_movil/auth/data/models/recuperar_password_response_models.dart'
     as _i9;
-import 'package:cssayp_movil/auth/domain/entities/usuario_entity.dart' as _i8;
-import 'package:cssayp_movil/auth/domain/repositories/usuario_repository.dart'
+import 'package:cssayp_movil/auth/data/models/recuperar_password_response_models.dart'
     as _i7;
-import 'package:cssayp_movil/boletas/data/models/historial_boletas_response_models.dart'
-    as _i3;
-import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart'
-    as _i4;
-import 'package:cssayp_movil/boletas/domain/entities/boleta_entity.dart' as _i2;
-import 'package:cssayp_movil/boletas/domain/repositories/boletas_repository.dart'
+import 'package:cssayp_movil/auth/domain/entities/usuario_entity.dart' as _i6;
+import 'package:cssayp_movil/auth/domain/repositories/usuario_repository.dart'
     as _i5;
+import 'package:cssayp_movil/boletas/boletas.dart' as _i2;
+import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart'
+    as _i3;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i10;
+import 'package:mockito/src/dummies.dart' as _i8;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -36,60 +32,77 @@ import 'package:mockito/src/dummies.dart' as _i10;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeBoletaEntity_0 extends _i1.SmartFake implements _i2.BoletaEntity {
-  _FakeBoletaEntity_0(Object parent, Invocation parentInvocation)
+class _FakeCrearBoletaInicioResult_0 extends _i1.SmartFake
+    implements _i2.CrearBoletaInicioResult {
+  _FakeCrearBoletaInicioResult_0(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
-class _FakeHistorialBoletasSuccessResponse_1 extends _i1.SmartFake
-    implements _i3.HistorialBoletasSuccessResponse {
-  _FakeHistorialBoletasSuccessResponse_1(
+class _FakeBoletaEntity_1 extends _i1.SmartFake implements _i2.BoletaEntity {
+  _FakeBoletaEntity_1(Object parent, Invocation parentInvocation)
+    : super(parent, parentInvocation);
+}
+
+class _FakeHistorialBoletasSuccessResponse_2 extends _i1.SmartFake
+    implements _i2.HistorialBoletasSuccessResponse {
+  _FakeHistorialBoletasSuccessResponse_2(
     Object parent,
     Invocation parentInvocation,
   ) : super(parent, parentInvocation);
 }
 
-class _FakePaginatedResponseModel_2 extends _i1.SmartFake
-    implements _i4.PaginatedResponseModel {
-  _FakePaginatedResponseModel_2(Object parent, Invocation parentInvocation)
+class _FakeParametrosBoletaInicioEntity_3 extends _i1.SmartFake
+    implements _i2.ParametrosBoletaInicioEntity {
+  _FakeParametrosBoletaInicioEntity_3(
+    Object parent,
+    Invocation parentInvocation,
+  ) : super(parent, parentInvocation);
+}
+
+class _FakePaginatedResponseModel_4 extends _i1.SmartFake
+    implements _i3.PaginatedResponseModel {
+  _FakePaginatedResponseModel_4(Object parent, Invocation parentInvocation)
     : super(parent, parentInvocation);
 }
 
 /// A class which mocks [BoletasRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockBoletasRepository extends _i1.Mock implements _i5.BoletasRepository {
+class MockBoletasRepository extends _i1.Mock implements _i2.BoletasRepository {
   MockBoletasRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<_i2.BoletaEntity> crearBoletaInicio({
+  _i4.Future<_i2.CrearBoletaInicioResult> crearBoletaInicio({
     required String? caratula,
-    required int? nroAfiliado,
-    required double? monto,
+    required String? juzgado,
+    required _i2.CircunscripcionEntity? circunscripcion,
+    required _i2.TipoJuicioEntity? tipoJuicio,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#crearBoletaInicio, [], {
               #caratula: caratula,
-              #nroAfiliado: nroAfiliado,
-              #monto: monto,
+              #juzgado: juzgado,
+              #circunscripcion: circunscripcion,
+              #tipoJuicio: tipoJuicio,
             }),
-            returnValue: _i6.Future<_i2.BoletaEntity>.value(
-              _FakeBoletaEntity_0(
+            returnValue: _i4.Future<_i2.CrearBoletaInicioResult>.value(
+              _FakeCrearBoletaInicioResult_0(
                 this,
                 Invocation.method(#crearBoletaInicio, [], {
                   #caratula: caratula,
-                  #nroAfiliado: nroAfiliado,
-                  #monto: monto,
+                  #juzgado: juzgado,
+                  #circunscripcion: circunscripcion,
+                  #tipoJuicio: tipoJuicio,
                 }),
               ),
             ),
           )
-          as _i6.Future<_i2.BoletaEntity>);
+          as _i4.Future<_i2.CrearBoletaInicioResult>);
 
   @override
-  _i6.Future<_i2.BoletaEntity> crearBoletaFinalizacion({
+  _i4.Future<_i2.BoletaEntity> crearBoletaFinalizacion({
     required int? nroAfiliado,
     required String? caratula,
     required int? idBoletaInicio,
@@ -116,8 +129,8 @@ class MockBoletasRepository extends _i1.Mock implements _i5.BoletasRepository {
               #anioExpediente: anioExpediente,
               #cuij: cuij,
             }),
-            returnValue: _i6.Future<_i2.BoletaEntity>.value(
-              _FakeBoletaEntity_0(
+            returnValue: _i4.Future<_i2.BoletaEntity>.value(
+              _FakeBoletaEntity_1(
                 this,
                 Invocation.method(#crearBoletaFinalizacion, [], {
                   #nroAfiliado: nroAfiliado,
@@ -135,34 +148,52 @@ class MockBoletasRepository extends _i1.Mock implements _i5.BoletasRepository {
               ),
             ),
           )
-          as _i6.Future<_i2.BoletaEntity>);
+          as _i4.Future<_i2.BoletaEntity>);
 
   @override
-  _i6.Future<_i3.HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
+  _i4.Future<_i2.HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
     int? nroAfiliado, {
     int? page,
+    int? mostrarPagadas = 1,
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #obtenerHistorialBoletas,
               [nroAfiliado],
-              {#page: page},
+              {#page: page, #mostrarPagadas: mostrarPagadas},
             ),
-            returnValue: _i6.Future<_i3.HistorialBoletasSuccessResponse>.value(
-              _FakeHistorialBoletasSuccessResponse_1(
+            returnValue: _i4.Future<_i2.HistorialBoletasSuccessResponse>.value(
+              _FakeHistorialBoletasSuccessResponse_2(
                 this,
                 Invocation.method(
                   #obtenerHistorialBoletas,
                   [nroAfiliado],
-                  {#page: page},
+                  {#page: page, #mostrarPagadas: mostrarPagadas},
                 ),
               ),
             ),
           )
-          as _i6.Future<_i3.HistorialBoletasSuccessResponse>);
+          as _i4.Future<_i2.HistorialBoletasSuccessResponse>);
 
   @override
-  _i6.Future<_i4.PaginatedResponseModel> buscarBoletasInicioPagadas({
+  _i4.Future<_i2.ParametrosBoletaInicioEntity> obtenerParametrosBoletaInicio(
+    int? nroAfiliado,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#obtenerParametrosBoletaInicio, [nroAfiliado]),
+            returnValue: _i4.Future<_i2.ParametrosBoletaInicioEntity>.value(
+              _FakeParametrosBoletaInicioEntity_3(
+                this,
+                Invocation.method(#obtenerParametrosBoletaInicio, [
+                  nroAfiliado,
+                ]),
+              ),
+            ),
+          )
+          as _i4.Future<_i2.ParametrosBoletaInicioEntity>);
+
+  @override
+  _i4.Future<_i3.PaginatedResponseModel> buscarBoletasInicioPagadas({
     required int? nroAfiliado,
     int? page = 1,
     String? caratulaBuscada,
@@ -173,8 +204,8 @@ class MockBoletasRepository extends _i1.Mock implements _i5.BoletasRepository {
               #page: page,
               #caratulaBuscada: caratulaBuscada,
             }),
-            returnValue: _i6.Future<_i4.PaginatedResponseModel>.value(
-              _FakePaginatedResponseModel_2(
+            returnValue: _i4.Future<_i3.PaginatedResponseModel>.value(
+              _FakePaginatedResponseModel_4(
                 this,
                 Invocation.method(#buscarBoletasInicioPagadas, [], {
                   #nroAfiliado: nroAfiliado,
@@ -184,55 +215,55 @@ class MockBoletasRepository extends _i1.Mock implements _i5.BoletasRepository {
               ),
             ),
           )
-          as _i6.Future<_i4.PaginatedResponseModel>);
+          as _i4.Future<_i3.PaginatedResponseModel>);
 }
 
 /// A class which mocks [UsuarioRepository].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockUsuarioRepository extends _i1.Mock implements _i7.UsuarioRepository {
+class MockUsuarioRepository extends _i1.Mock implements _i5.UsuarioRepository {
   MockUsuarioRepository() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i6.Future<_i8.UsuarioEntity?> autenticar(
+  _i4.Future<_i6.UsuarioEntity?> autenticar(
     String? usuario,
     String? password,
   ) =>
       (super.noSuchMethod(
             Invocation.method(#autenticar, [usuario, password]),
-            returnValue: _i6.Future<_i8.UsuarioEntity?>.value(),
+            returnValue: _i4.Future<_i6.UsuarioEntity?>.value(),
           )
-          as _i6.Future<_i8.UsuarioEntity?>);
+          as _i4.Future<_i6.UsuarioEntity?>);
 
   @override
-  _i6.Future<bool> estaAutenticado() =>
+  _i4.Future<bool> estaAutenticado() =>
       (super.noSuchMethod(
             Invocation.method(#estaAutenticado, []),
-            returnValue: _i6.Future<bool>.value(false),
+            returnValue: _i4.Future<bool>.value(false),
           )
-          as _i6.Future<bool>);
+          as _i4.Future<bool>);
 
   @override
-  _i6.Future<void> cerrarSesion() =>
+  _i4.Future<void> cerrarSesion() =>
       (super.noSuchMethod(
             Invocation.method(#cerrarSesion, []),
-            returnValue: _i6.Future<void>.value(),
-            returnValueForMissingStub: _i6.Future<void>.value(),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i6.Future<void>);
+          as _i4.Future<void>);
 
   @override
-  _i6.Future<_i8.UsuarioEntity?> obtenerUsuarioActual() =>
+  _i4.Future<_i6.UsuarioEntity?> obtenerUsuarioActual() =>
       (super.noSuchMethod(
             Invocation.method(#obtenerUsuarioActual, []),
-            returnValue: _i6.Future<_i8.UsuarioEntity?>.value(),
+            returnValue: _i4.Future<_i6.UsuarioEntity?>.value(),
           )
-          as _i6.Future<_i8.UsuarioEntity?>);
+          as _i4.Future<_i6.UsuarioEntity?>);
 
   @override
-  _i6.Future<_i9.RecuperarResponseModel> recuperarPassword(
+  _i4.Future<_i7.RecuperarResponseModel> recuperarPassword(
     String? tipoDocumento,
     String? nroDocumento,
     String? email,
@@ -243,8 +274,8 @@ class MockUsuarioRepository extends _i1.Mock implements _i7.UsuarioRepository {
               nroDocumento,
               email,
             ]),
-            returnValue: _i6.Future<_i9.RecuperarResponseModel>.value(
-              _i10.dummyValue<_i9.RecuperarResponseModel>(
+            returnValue: _i4.Future<_i7.RecuperarResponseModel>.value(
+              _i8.dummyValue<_i7.RecuperarResponseModel>(
                 this,
                 Invocation.method(#recuperarPassword, [
                   tipoDocumento,
@@ -254,10 +285,10 @@ class MockUsuarioRepository extends _i1.Mock implements _i7.UsuarioRepository {
               ),
             ),
           )
-          as _i6.Future<_i9.RecuperarResponseModel>);
+          as _i4.Future<_i7.RecuperarResponseModel>);
 
   @override
-  _i6.Future<_i11.CambiarPasswordResponseModel> cambiarPassword(
+  _i4.Future<_i9.CambiarPasswordResponseModel> cambiarPassword(
     String? passwordActual,
     String? passwordNueva,
   ) =>
@@ -266,8 +297,8 @@ class MockUsuarioRepository extends _i1.Mock implements _i7.UsuarioRepository {
               passwordActual,
               passwordNueva,
             ]),
-            returnValue: _i6.Future<_i11.CambiarPasswordResponseModel>.value(
-              _i10.dummyValue<_i11.CambiarPasswordResponseModel>(
+            returnValue: _i4.Future<_i9.CambiarPasswordResponseModel>.value(
+              _i8.dummyValue<_i9.CambiarPasswordResponseModel>(
                 this,
                 Invocation.method(#cambiarPassword, [
                   passwordActual,
@@ -276,5 +307,5 @@ class MockUsuarioRepository extends _i1.Mock implements _i7.UsuarioRepository {
               ),
             ),
           )
-          as _i6.Future<_i11.CambiarPasswordResponseModel>);
+          as _i4.Future<_i9.CambiarPasswordResponseModel>);
 }

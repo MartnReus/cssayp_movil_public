@@ -12,8 +12,10 @@ final obtenerHistorialBoletasUseCaseProvider = FutureProvider<ObtenerHistorialBo
 );
 
 final obtenerParametrosBoletaInicioUseCaseProvider = FutureProvider<ObtenerParametrosBoletaInicioUseCase>(
-  (ref) async =>
-      ObtenerParametrosBoletaInicioUseCase(boletasRepository: await ref.read(boletasRepositoryProvider.future)),
+  (ref) async => ObtenerParametrosBoletaInicioUseCase(
+    boletasRepository: await ref.read(boletasRepositoryProvider.future),
+    usuarioRepository: await ref.read(usuarioRepositoryProvider.future),
+  ),
 );
 
 final generarBoletaInicioUseCaseProvider = FutureProvider<GenerarBoletaInicioUseCase>(

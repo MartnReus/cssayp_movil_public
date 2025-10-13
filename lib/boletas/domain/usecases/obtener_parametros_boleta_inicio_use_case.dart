@@ -1,13 +1,17 @@
-// import 'package:cssayp_movil/boletas/domain/entities/parametros_boleta_inicio_entity.dart';
-import 'package:cssayp_movil/boletas/domain/repositories/boletas_repository.dart';
+import 'package:cssayp_movil/auth/auth.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
 
 class ObtenerParametrosBoletaInicioUseCase {
   final BoletasRepository boletasRepository;
+  final UsuarioRepository usuarioRepository;
 
-  ObtenerParametrosBoletaInicioUseCase({required this.boletasRepository});
+  ObtenerParametrosBoletaInicioUseCase({required this.boletasRepository, required this.usuarioRepository});
 
-  /// TODO: implementar cuando haya una API para obtener los parámetros
-  // Future<ParametrosBoletaInicioEntity> execute() async {
-  //   return await boletasRepository.obtenerParametrosBoletaInicio();
-  // }
+  Future<ParametrosBoletaInicioEntity> execute() async {
+    final usuario = await usuarioRepository.obtenerUsuarioActual();
+    if (usuario == null) {
+      throw Exception('No hay usuario autenticado');
+    }
+    return await boletasRepository.obtenerParametrosBoletaInicio(usuario.nroAfiliado);
+  }
 }

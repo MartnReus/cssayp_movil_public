@@ -5,29 +5,20 @@ import 'package:http/http.dart' as http;
 
 enum ConnectivityStatus { online, offline }
 
-final connectivityProvider = StateNotifierProvider<ConnectivityNotifier, ConnectivityStatus>((ref) {
-  return ConnectivityNotifier();
-});
+final connectivityProvider = StreamNotifierProvider<ConnectivityNotifier, ConnectivityStatus>(ConnectivityNotifier.new);
 
-class ConnectivityNotifier extends StateNotifier<ConnectivityStatus> {
-  late final StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
-
-  ConnectivityNotifier() : super(ConnectivityStatus.offline) {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) async {
-      final hasConnection = results.any((result) => result != ConnectivityResult.none);
-      if (hasConnection) {
-        final hasInternet = await _checkInternetConnection();
-        state = hasInternet ? ConnectivityStatus.online : ConnectivityStatus.offline;
-      } else {
-        state = ConnectivityStatus.offline;
+class ConnectivityNotifier extends StreamNotifier<ConnectivityStatus> {
+  @override
+  Stream<ConnectivityStatus> build() {
+    final connectivityStream = Connectivity().onConnectivityChanged;
+    return connectivityStream.asyncMap((result) async {
+      if (result.contains(ConnectivityResult.none)) {
+        return ConnectivityStatus.offline;
       }
-    });
-    _checkInitialConnection();
-  }
 
-  void _checkInitialConnection() async {
-    final hasInternet = await _checkInternetConnection();
-    state = hasInternet ? ConnectivityStatus.online : ConnectivityStatus.offline;
+      final hasInternet = await _checkInternetConnection();
+      return hasInternet ? ConnectivityStatus.online : ConnectivityStatus.offline;
+    });
   }
 
   Future<bool> _checkInternetConnection() async {
@@ -37,11 +28,5 @@ class ConnectivityNotifier extends StateNotifier<ConnectivityStatus> {
     } catch (_) {
       return false;
     }
-  }
-
-  @override
-  void dispose() {
-    _connectivitySubscription.cancel();
-    super.dispose();
   }
 }

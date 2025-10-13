@@ -19,6 +19,16 @@ import 'package:cssayp_movil/shared/services/jwt_token_service.dart';
 import "../test/auth/data/datasources/usuario_data_source_test.mocks.dart";
 import '../test/auth/presentation/providers/auth_provider_test.mocks.dart';
 
+Future<void> pumpFrames(
+  WidgetTester tester, {
+  int frames = 10,
+  Duration frameDuration = const Duration(milliseconds: 100),
+}) async {
+  for (int i = 0; i < frames; i++) {
+    await tester.pump(frameDuration);
+  }
+}
+
 /// Mock personalizado para SecureStorageDataSource que simula el almacenamiento del token
 class MockSecureStorageDataSource extends Mock implements SecureStorageDataSource {
   String? _storedToken;
@@ -235,32 +245,32 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Después del login exitoso, debería navegar a MainNavigationScreen que contiene HomeScreen
       expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(CrearBoletaScreen), findsOneWidget);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaFinScreen), findsOneWidget);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Esperar a que se carguen las boletas
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar la primera carátula disponible
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Completar campos opcionales
       await tester.enterText(find.byType(TextFormField).at(0), '12345');
@@ -268,7 +278,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(2), '98765');
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso2BoletaFinScreen), findsOneWidget);
 
@@ -286,11 +296,11 @@ void main() {
       }
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Esperar un poco más para que se complete la validación y navegación
       await tester.pump(const Duration(milliseconds: 1000));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Debug: verificar qué pantalla estamos viendo
       if (find.byType(Paso3BoletaFinScreen).evaluate().isEmpty) {
@@ -304,19 +314,19 @@ void main() {
         // Si aún estamos en paso 2, intentar nuevamente
         if (find.byType(Paso2BoletaFinScreen).evaluate().isNotEmpty) {
           await tester.pump(const Duration(milliseconds: 500));
-          await tester.pumpAndSettle();
+          await pumpFrames(tester);
         }
       }
 
       expect(find.byType(Paso3BoletaFinScreen), findsOneWidget);
 
       await tester.tap(find.text('GENERAR'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Confirmar en el diálogo
       await tester.tap(find.text('SÍ'), warnIfMissed: false);
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(BoletaCreadaScreen), findsOneWidget);
       expect(find.text('Boleta generada con éxito'), findsOneWidget);
@@ -350,18 +360,18 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaFinScreen), findsOneWidget);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('Campo obligatorio'), findsAtLeastNWidgets(1));
       expect(find.byType(Paso1BoletaFinScreen), findsOneWidget);
@@ -396,31 +406,31 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso2BoletaFinScreen), findsOneWidget);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('Campo obligatorio'), findsAtLeastNWidgets(1));
       expect(find.byType(Paso2BoletaFinScreen), findsOneWidget);
@@ -455,32 +465,32 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar fecha
       await _seleccionarFechaEnDatePicker(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('Campo obligatorio'), findsAtLeastNWidgets(1));
       expect(find.byType(Paso2BoletaFinScreen), findsOneWidget);
@@ -517,26 +527,26 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar fecha
       await _seleccionarFechaEnDatePicker(tester);
@@ -552,7 +562,7 @@ void main() {
       }
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('Solo números permitidos'), findsAtLeastNWidgets(1));
       expect(find.byType(Paso2BoletaFinScreen), findsOneWidget);
@@ -601,26 +611,26 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar fecha
       await _seleccionarFechaEnDatePicker(tester);
@@ -636,15 +646,15 @@ void main() {
       }
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('GENERAR'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Confirmar en el diálogo
       await tester.tap(find.text('SÍ'), warnIfMissed: false);
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.byType(Paso3BoletaFinScreen), findsOneWidget);
@@ -693,26 +703,26 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar fecha
       await _seleccionarFechaEnDatePicker(tester);
@@ -728,15 +738,15 @@ void main() {
       }
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('GENERAR'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Confirmar en el diálogo
       await tester.tap(find.text('SÍ'), warnIfMissed: false);
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.byType(Paso3BoletaFinScreen), findsOneWidget);
@@ -771,31 +781,31 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso2BoletaFinScreen), findsOneWidget);
 
       await tester.tap(find.text('Volver'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaFinScreen), findsOneWidget);
       // Verificar que estamos de vuelta en el paso 1
@@ -830,26 +840,26 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Finalización'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar carátula
       await tester.tap(find.text('Seleccione una carátula'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.pump(const Duration(seconds: 2));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Perez, Juan c/ Garcia, Maria s/ Daños y Perjuicios'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       // Seleccionar fecha
       await _seleccionarFechaEnDatePicker(tester);
@@ -865,13 +875,13 @@ void main() {
       }
 
       await tester.tap(find.text('SIGUIENTE'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('GENERAR'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('NO'), warnIfMissed: false);
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso3BoletaFinScreen), findsOneWidget);
       expect(find.byType(BoletaCreadaScreen), findsNothing);
@@ -895,7 +905,7 @@ Future<void> _esperarLoginScreen(WidgetTester tester) async {
   expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
   await tester.pump(const Duration(milliseconds: 500));
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
 
   expect(find.byType(LoginScreen), findsOneWidget);
   expect(find.byType(SplashScreen), findsNothing);
@@ -908,11 +918,11 @@ Future<void> _esperarLoginScreen(WidgetTester tester) async {
 Future<void> _seleccionarFechaEnDatePicker(WidgetTester tester) async {
   // Buscar el campo de fecha por texto directamente
   await tester.tap(find.text('Seleccione fecha'), warnIfMissed: false);
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
 
   // Esperar a que aparezca el date picker
   await tester.pump(const Duration(milliseconds: 500));
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
 
   // Intentar encontrar y hacer tap en el botón de confirmar
   final confirmButton = find.byWidgetPredicate(
@@ -935,7 +945,7 @@ Future<void> _seleccionarFechaEnDatePicker(WidgetTester tester) async {
     }
   }
 
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
 }
 
 String _generateValidJwtToken() {

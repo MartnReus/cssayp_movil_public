@@ -1,7 +1,8 @@
+import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cssayp_movil/boletas/presentation/widgets/historial_boletas.dart';
-import 'package:cssayp_movil/boletas/presentation/widgets/historial_juicios.dart';
+
+import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 
 class HistorialScreen extends ConsumerStatefulWidget {
   const HistorialScreen({super.key});
@@ -29,6 +30,15 @@ class _HistorialScreenState extends ConsumerState<HistorialScreen> with SingleTi
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFEEF9FF),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final navigator = ref.read(navigationProvider).navigatorState;
+          if (navigator != null) {
+            navigator.pushNamed("/crear-boleta");
+          }
+        },
+        child: const Icon(Icons.add),
+      ),
       body: Column(
         children: [
           // Título principal

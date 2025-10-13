@@ -100,7 +100,11 @@ void main() {
   group('BoletaInicioDataState', () {
     test('copyWith debería crear una nueva instancia con los valores actualizados', () {
       // Arrange
-      const initialState = BoletaInicioDataState();
+      final mockParametros = ParametrosBoletaInicioEntity(
+        tiposJuicio: [TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio')],
+        circunscripciones: [CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion')],
+      );
+      final initialState = BoletaInicioDataState(parametrosBoletaInicio: mockParametros);
 
       // Act
       final newState = initialState.copyWith(
@@ -113,12 +117,16 @@ void main() {
       expect(newState.actor, 'Juan Pérez');
       expect(newState.demandado, 'María García');
       expect(newState.causa, 'Daños y perjuicios');
-      expect(newState.isValid, true);
+      expect(newState.isValid, false); // Still false because juzgado, tipoJuicio, and circunscripcion are null
     });
 
     test('isValid debería ser false cuando faltan campos', () {
       // Arrange
-      const state = BoletaInicioDataState(actor: 'Juan Pérez');
+      final mockParametros = ParametrosBoletaInicioEntity(
+        tiposJuicio: [TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio')],
+        circunscripciones: [CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion')],
+      );
+      final state = BoletaInicioDataState(parametrosBoletaInicio: mockParametros, actor: 'Juan Pérez');
 
       // Assert
       expect(state.isValid, false);
@@ -126,7 +134,22 @@ void main() {
 
     test('isValid debería ser true cuando todos los campos están presentes', () {
       // Arrange
-      const state = BoletaInicioDataState(actor: 'Juan Pérez', demandado: 'María García', causa: 'Daños y perjuicios');
+      final mockParametros = ParametrosBoletaInicioEntity(
+        tiposJuicio: [TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio')],
+        circunscripciones: [CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion')],
+      );
+      final mockTipoJuicio = TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio');
+      final mockCircunscripcion = CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion');
+
+      final state = BoletaInicioDataState(
+        parametrosBoletaInicio: mockParametros,
+        actor: 'Juan Pérez',
+        demandado: 'María García',
+        causa: 'Daños y perjuicios',
+        juzgado: 'Test Juzgado',
+        tipoJuicio: mockTipoJuicio,
+        circunscripcion: mockCircunscripcion,
+      );
 
       // Assert
       expect(state.isValid, true);
@@ -134,7 +157,15 @@ void main() {
 
     test('copyWith debería mantener valores originales cuando no se especifican', () {
       // Arrange
-      const initialState = BoletaInicioDataState(actor: 'Actor Original', demandado: 'Demandado Original');
+      final mockParametros = ParametrosBoletaInicioEntity(
+        tiposJuicio: [TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio')],
+        circunscripciones: [CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion')],
+      );
+      final initialState = BoletaInicioDataState(
+        parametrosBoletaInicio: mockParametros,
+        actor: 'Actor Original',
+        demandado: 'Demandado Original',
+      );
 
       // Act
       final newState = initialState.copyWith(causa: 'Nueva Causa');
@@ -143,7 +174,7 @@ void main() {
       expect(newState.actor, 'Actor Original'); // Mantenido
       expect(newState.demandado, 'Demandado Original'); // Mantenido
       expect(newState.causa, 'Nueva Causa'); // Actualizado
-      expect(newState.isValid, true); // Ahora es válido
+      expect(newState.isValid, false); // Still false because juzgado, tipoJuicio, and circunscripcion are null
     });
   });
 

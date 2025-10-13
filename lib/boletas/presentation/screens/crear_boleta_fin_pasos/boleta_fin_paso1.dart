@@ -287,6 +287,18 @@ class _Paso1BoletaFinScreenState extends ConsumerState<Paso1BoletaFinScreen> {
             height: 1.40,
           ),
         ),
+        const SizedBox(height: 2),
+        const Text(
+          'Solo se pueden seleccionar juicios con boletas de inicio pagadas',
+          style: TextStyle(
+            color: Color(0xFF666666),
+            fontSize: 12,
+            fontFamily: 'Inter',
+            fontWeight: FontWeight.w400,
+            height: 1.33,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
         const SizedBox(height: 4),
 
         // Campo de selección principal

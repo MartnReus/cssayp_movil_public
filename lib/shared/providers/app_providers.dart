@@ -1,5 +1,6 @@
 import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/pagos/pagos.dart';
 import 'package:cssayp_movil/shared/services/jwt_token_service.dart';
 import 'package:cssayp_movil/shared/database/database_helper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,11 @@ final boletasRepositoryProvider = FutureProvider<BoletasRepository>(
     jwtTokenService: ref.read(jwtTokenServiceProvider),
   ),
 );
+
+final paywayRepositoryProvider = FutureProvider<PaywayRepository>(
+  (ref) async => PaywayRepositoryImpl(paywayDataSource: ref.read(paywayDataSourceProvider)),
+);
+
 //--------------------------------------
 
 //--------- Data sources ---------------
@@ -49,6 +55,10 @@ final boletasDataSourceProvider = Provider<BoletasDataSource>(
 
 final boletasLocalDataSourceProvider = Provider<BoletasLocalDataSource>(
   (ref) => BoletasLocalDataSource(databaseHelper: ref.read(databaseHelperProvider)),
+);
+
+final paywayDataSourceProvider = Provider<PaywayDataSource>(
+  (ref) => PaywayDataSource(client: ref.read(httpClientProvider)),
 );
 
 //--------------------------------------

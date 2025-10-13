@@ -1,4 +1,5 @@
 import 'package:cssayp_movil/auth/presentation/providers/auth_provider.dart';
+import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -237,7 +238,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             icon: Icons.post_add,
                             label: 'Nueva boleta',
                             onPressed: () {
-                              Navigator.pushNamed(context, '/crear-boleta');
+                              ref.read(navigationProvider.notifier).selectTab(1, routeName: '/crear-boleta');
                             },
                           ),
                         ),
@@ -247,7 +248,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             icon: Icons.payment,
                             label: 'Pagos',
                             onPressed: () {
-                              _showComingSoonDialog(context, 'Pagos');
+                              ref.read(navigationProvider.notifier).selectTab(2);
                             },
                           ),
                         ),

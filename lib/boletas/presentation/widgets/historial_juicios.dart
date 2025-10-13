@@ -4,6 +4,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:intl/intl.dart';
 
 import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/pagos/pagos.dart';
 
 class HistorialJuiciosWidget extends ConsumerStatefulWidget {
   const HistorialJuiciosWidget({super.key});
@@ -491,10 +492,7 @@ class _HistorialJuiciosWidgetState extends ConsumerState<HistorialJuiciosWidget>
                                 icon: Icons.payments_outlined,
                                 label: 'Pagar',
                                 onTap: () {
-                                  // TODO: redirigir a pantalla de pago
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Redirigiendo a pantalla de pago (próximamente)')),
-                                  );
+                                  _navegarAPago(j);
                                 },
                               ),
                             ],
@@ -711,6 +709,63 @@ class _HistorialJuiciosWidgetState extends ConsumerState<HistorialJuiciosWidget>
       default:
         return const Color(0xFF111112); // Color por defecto
     }
+  }
+
+  /// Recolecta todas las boletas pendientes de pago de un juicio
+  List<BoletaEntity> _obtenerBoletasPendientes(JuicioHistorial juicio) {
+    List<BoletaEntity> boletasPendientes = [];
+
+    // Agregar boleta de inicio si está pendiente
+    if (juicio.boletaInicio.estado == EstadoBoleta.pendiente) {
+      boletasPendientes.add(
+        BoletaEntity(
+          id: 0, // ID temporal para boletas no creadas aún
+          monto: juicio.boletaInicio.monto,
+          fechaImpresion: DateTime.now(), // Fecha actual como fecha de impresión
+          fechaVencimiento: juicio.boletaInicio.fechaVencimiento,
+          caratula: juicio.caratula,
+          tipo: BoletaTipo.inicio,
+          fechaPago: juicio.boletaInicio.fechaPago,
+        ),
+      );
+    }
+
+    // Agregar boletas de fin pendientes
+    for (int i = 0; i < juicio.boletasFin.length; i++) {
+      final boletaFin = juicio.boletasFin[i];
+      if (boletaFin.estado == EstadoBoleta.pendiente) {
+        boletasPendientes.add(
+          BoletaEntity(
+            id: i + 1000, // ID temporal para boletas de fin
+            monto: boletaFin.monto,
+            fechaImpresion: DateTime.now(), // Fecha actual como fecha de impresión
+            fechaVencimiento: boletaFin.fechaVencimiento,
+            caratula: juicio.caratula,
+            tipo: BoletaTipo.finalizacion,
+            fechaPago: boletaFin.fechaPago,
+          ),
+        );
+      }
+    }
+
+    return boletasPendientes;
+  }
+
+  /// Navega a la pantalla de procesamiento de pago
+  void _navegarAPago(JuicioHistorial juicio) {
+    final boletasPendientes = _obtenerBoletasPendientes(juicio);
+
+    if (boletasPendientes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hay boletas pendientes de pago para este juicio'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProcesarPagoScreen(boletas: boletasPendientes)));
   }
 
   Widget _accion({required IconData icon, required String label, required VoidCallback onTap}) {

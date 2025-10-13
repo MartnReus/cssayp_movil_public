@@ -4,6 +4,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:cssayp_movil/boletas/presentation/widgets/historial_boletas.dart';
+import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
+
+class _TestNavigationNotifier extends NavigationNotifier {
+  @override
+  NavigationState build() => NavigationState(
+    index: 0,
+    navigationKeys: [
+      GlobalKey<NavigatorState>(),
+      GlobalKey<NavigatorState>(),
+      GlobalKey<NavigatorState>(),
+      GlobalKey<NavigatorState>(),
+    ],
+  );
+}
 
 void main() {
   setUpAll(() async {
@@ -26,11 +40,12 @@ void main() {
     testWidgets('debe mostrar el estado de carga inicialmente', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
+          // overrides: [navigationProvider.overrideWith(() => _TestNavigationNotifier())],
           child: const MaterialApp(home: Scaffold(body: HistorialBoletasWidget())),
         ),
       );
 
-      await tester.pump();
+      tester.pump();
 
       // Verificar que se muestra el indicador de carga
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -93,6 +108,7 @@ void main() {
     testWidgets('debe mostrar el indicador de carga con el color correcto', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [navigationProvider.overrideWith(() => _TestNavigationNotifier())],
           child: const MaterialApp(home: Scaffold(body: HistorialBoletasWidget())),
         ),
       );
@@ -107,6 +123,7 @@ void main() {
     testWidgets('debe mostrar el texto de carga con la fuente correcta', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
+          overrides: [navigationProvider.overrideWith(() => _TestNavigationNotifier())],
           child: const MaterialApp(home: Scaffold(body: HistorialBoletasWidget())),
         ),
       );

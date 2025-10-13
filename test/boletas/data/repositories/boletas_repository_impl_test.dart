@@ -16,6 +16,7 @@ void provideDummyValues() {
   provideDummy<PaginatedResponseModel>(
     PaginatedResponseModel(statusCode: 0, data: [], currentPage: 1, lastPage: 1, total: 0, perPage: 10),
   );
+  provideDummy<CrearBoletaInicioResult>(CrearBoletaInicioResult(idBoleta: 0, urlPago: 'dummy'));
 }
 
 @GenerateMocks([BoletasDataSource, BoletasLocalDataSource, JwtTokenService])
@@ -43,86 +44,85 @@ void main() {
 
   group('crearBoletaInicio', () {
     const testCaratula = 'Test Caratula';
-    const testNroAfiliado = 12345;
-    const testMonto = 1500.50;
-    const testDigito = '5';
+    const testJuzgado = 'Test Juzgado';
+    const testToken = 'test-token';
+
+    final testCircunscripcion = CircunscripcionEntity(id: '1', descripcion: 'Test Circunscripcion');
+    final testTipoJuicio = TipoJuicioEntity(id: '1', descripcion: 'Test Tipo Juicio');
 
     test('debería crear boleta de inicio exitosamente', () async {
       // Arrange
       final successResponse = CrearBoletaSuccessResponse(
         statusCode: 201,
         idBoleta: 1001,
-        idTipoBoleta: 1,
-        idTipoTransaccion: '1',
-        codBarra: '123456789',
-        caratula: testCaratula,
-        fechaImpresion: '2024-01-15T10:00:00Z',
-        fechaVencimiento: '30',
-        montoEntero: '1500',
-        montoDecimal: '50',
-        gastosAdministrativos: 25.0,
+        urlPago: 'https://test-payment-url.com',
       );
 
-      when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => testDigito);
+      when(mockJwtTokenService.obtenerToken()).thenAnswer((_) async => testToken);
       when(
         mockBoletasDataSource.crearBoletaInicio(
+          token: testToken,
           caratula: testCaratula,
-          nroAfiliado: testNroAfiliado,
-          monto: testMonto,
-          digito: testDigito,
+          juzgado: testJuzgado,
+          circunscripcion: testCircunscripcion,
+          tipoJuicio: testTipoJuicio,
         ),
       ).thenAnswer((_) async => successResponse);
 
       // Act
       final result = await repository.crearBoletaInicio(
         caratula: testCaratula,
-        nroAfiliado: testNroAfiliado,
-        monto: testMonto,
+        juzgado: testJuzgado,
+        circunscripcion: testCircunscripcion,
+        tipoJuicio: testTipoJuicio,
       );
 
       // Assert
-      expect(result, isA<BoletaEntity>());
-      expect(result.id, equals(1001));
-      expect(result.tipo, equals(BoletaTipo.inicio));
-      expect(result.monto, equals(1500.50));
-      expect(result.caratula, equals(testCaratula));
-      expect(result.codBarra, equals('123456789'));
-      expect(result.gastosAdministrativos, equals(25.0));
+      expect(result, isA<CrearBoletaInicioResult>());
+      expect(result.idBoleta, equals(1001));
+      expect(result.urlPago, equals('https://test-payment-url.com'));
 
-      verify(mockJwtTokenService.obtenerDigito()).called(1);
+      verify(mockJwtTokenService.obtenerToken()).called(1);
       verify(
         mockBoletasDataSource.crearBoletaInicio(
+          token: testToken,
           caratula: testCaratula,
-          nroAfiliado: testNroAfiliado,
-          monto: testMonto,
-          digito: testDigito,
+          juzgado: testJuzgado,
+          circunscripcion: testCircunscripcion,
+          tipoJuicio: testTipoJuicio,
         ),
       ).called(1);
     });
 
-    test('debería lanzar excepción cuando no se puede obtener el dígito', () async {
+    test('debería lanzar excepción cuando no se puede obtener el token', () async {
       // Arrange
-      when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => null);
+      when(mockJwtTokenService.obtenerToken()).thenAnswer((_) async => null);
 
       // Act & Assert
       expect(
-        () => repository.crearBoletaInicio(caratula: testCaratula, nroAfiliado: testNroAfiliado, monto: testMonto),
+        () => repository.crearBoletaInicio(
+          caratula: testCaratula,
+          juzgado: testJuzgado,
+          circunscripcion: testCircunscripcion,
+          tipoJuicio: testTipoJuicio,
+        ),
         throwsA(
           isA<Exception>().having(
             (e) => e.toString(),
             'message',
-            contains('No se pudo obtener el dígito del token de autenticación'),
+            contains('No se pudo obtener el token de autenticación'),
           ),
         ),
       );
 
-      verify(mockJwtTokenService.obtenerDigito()).called(1);
+      verify(mockJwtTokenService.obtenerToken()).called(1);
       verifyNever(
         mockBoletasDataSource.crearBoletaInicio(
+          token: anyNamed('token'),
           caratula: anyNamed('caratula'),
-          nroAfiliado: anyNamed('nroAfiliado'),
-          monto: anyNamed('monto'),
-          digito: anyNamed('digito'),
+          juzgado: anyNamed('juzgado'),
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
         ),
       );
     });
@@ -131,107 +131,41 @@ void main() {
       // Arrange
       final errorResponse = CrearBoletaGenericErrorResponse(statusCode: 400, errorMessage: 'Error de validación');
 
-      when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => testDigito);
+      when(mockJwtTokenService.obtenerToken()).thenAnswer((_) async => testToken);
       when(
         mockBoletasDataSource.crearBoletaInicio(
+          token: testToken,
           caratula: testCaratula,
-          nroAfiliado: testNroAfiliado,
-          monto: testMonto,
-          digito: testDigito,
+          juzgado: testJuzgado,
+          circunscripcion: testCircunscripcion,
+          tipoJuicio: testTipoJuicio,
         ),
       ).thenAnswer((_) async => errorResponse);
 
       // Act & Assert
       try {
-        await repository.crearBoletaInicio(caratula: testCaratula, nroAfiliado: testNroAfiliado, monto: testMonto);
+        await repository.crearBoletaInicio(
+          caratula: testCaratula,
+          juzgado: testJuzgado,
+          circunscripcion: testCircunscripcion,
+          tipoJuicio: testTipoJuicio,
+        );
         fail('Se esperaba que se lanzara una excepción');
       } catch (e) {
         expect(e, isA<Exception>());
         expect(e.toString(), contains('Error al crear boleta de inicio: Error de validación'));
       }
 
-      verify(mockJwtTokenService.obtenerDigito()).called(1);
+      verify(mockJwtTokenService.obtenerToken()).called(1);
       verify(
         mockBoletasDataSource.crearBoletaInicio(
+          token: testToken,
           caratula: testCaratula,
-          nroAfiliado: testNroAfiliado,
-          monto: testMonto,
-          digito: testDigito,
+          juzgado: testJuzgado,
+          circunscripcion: testCircunscripcion,
+          tipoJuicio: testTipoJuicio,
         ),
       ).called(1);
-    });
-
-    test('debería manejar valores nulos en monto correctamente', () async {
-      // Arrange
-      final successResponse = CrearBoletaSuccessResponse(
-        statusCode: 201,
-        idBoleta: 1001,
-        idTipoBoleta: 1,
-        idTipoTransaccion: '1',
-        codBarra: '123456789',
-        caratula: testCaratula,
-        fechaImpresion: '2024-01-15T10:00:00Z',
-        fechaVencimiento: '30',
-        montoEntero: null,
-        montoDecimal: null,
-      );
-
-      when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => testDigito);
-      when(
-        mockBoletasDataSource.crearBoletaInicio(
-          caratula: testCaratula,
-          nroAfiliado: testNroAfiliado,
-          monto: testMonto,
-          digito: testDigito,
-        ),
-      ).thenAnswer((_) async => successResponse);
-
-      // Act
-      final result = await repository.crearBoletaInicio(
-        caratula: testCaratula,
-        nroAfiliado: testNroAfiliado,
-        monto: testMonto,
-      );
-
-      // Assert
-      expect(result.monto, equals(0.0));
-    });
-
-    test('debería calcular fecha de vencimiento correctamente', () async {
-      // Arrange
-      final successResponse = CrearBoletaSuccessResponse(
-        statusCode: 201,
-        idBoleta: 1001,
-        idTipoBoleta: 1,
-        idTipoTransaccion: '1',
-        codBarra: '123456789',
-        caratula: testCaratula,
-        fechaImpresion: '2024-01-15T10:00:00Z',
-        fechaVencimiento: '45',
-        montoEntero: '1500',
-        montoDecimal: '50',
-      );
-
-      when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => testDigito);
-      when(
-        mockBoletasDataSource.crearBoletaInicio(
-          caratula: testCaratula,
-          nroAfiliado: testNroAfiliado,
-          monto: testMonto,
-          digito: testDigito,
-        ),
-      ).thenAnswer((_) async => successResponse);
-
-      // Act
-      final result = await repository.crearBoletaInicio(
-        caratula: testCaratula,
-        nroAfiliado: testNroAfiliado,
-        monto: testMonto,
-      );
-
-      // Assert
-      final expectedVencimiento = DateTime.parse('2024-01-15T10:00:00Z').add(const Duration(days: 45));
-      expect(result.fechaVencimiento, equals(expectedVencimiento));
     });
   });
 
@@ -254,16 +188,7 @@ void main() {
       final successResponse = CrearBoletaSuccessResponse(
         statusCode: 201,
         idBoleta: 1002,
-        idTipoBoleta: 2,
-        idTipoTransaccion: '2',
-        codBarra: '987654321',
-        caratula: testCaratula,
-        fechaImpresion: '2024-01-15T10:00:00Z',
-        fechaVencimiento: '30',
-        diasVencimiento: '30',
-        montoEntero: '2000',
-        montoDecimal: '0',
-        gastosAdministrativos: 50.0,
+        urlPago: 'https://test-payment-url.com',
       );
 
       when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => testDigito);
@@ -305,8 +230,8 @@ void main() {
       expect(result.tipo, equals(BoletaTipo.finalizacion));
       expect(result.monto, equals(2000.0));
       expect(result.caratula, equals(testCaratula));
-      expect(result.codBarra, equals('987654321'));
-      expect(result.gastosAdministrativos, equals(50.0));
+      expect(result.codBarra, isNull);
+      expect(result.gastosAdministrativos, isNull);
 
       verify(mockJwtTokenService.obtenerDigito()).called(1);
       verify(
@@ -441,15 +366,7 @@ void main() {
       final successResponse = CrearBoletaSuccessResponse(
         statusCode: 201,
         idBoleta: 1002,
-        idTipoBoleta: 2,
-        idTipoTransaccion: '2',
-        codBarra: '987654321',
-        caratula: testCaratula,
-        fechaImpresion: '2024-01-15T10:00:00Z',
-        fechaVencimiento: '30',
-        diasVencimiento: '30',
-        montoEntero: '2000',
-        montoDecimal: '0',
+        urlPago: 'https://test-payment-url.com',
       );
 
       when(mockJwtTokenService.obtenerDigito()).thenAnswer((_) async => testDigito);

@@ -75,8 +75,15 @@ class MockJwtTokenService extends Mock implements JwtTokenService {
 }
 
 class MockConnectivityNotifier extends ConnectivityNotifier {
-  MockConnectivityNotifier(ConnectivityStatus status) : super() {
-    state = status;
+  late final ConnectivityStatus _mockStatus;
+
+  @override
+  Stream<ConnectivityStatus> build() {
+    return Stream.value(_mockStatus);
+  }
+
+  void setMockStatus(ConnectivityStatus status) {
+    _mockStatus = status;
   }
 }
 
@@ -441,7 +448,7 @@ void main() {
           secureStorageDataSourceProvider.overrideWith((ref) => mockSecureStorageDataSource),
           jwtTokenServiceProvider.overrideWith((ref) => mockJwtTokenService),
           // Mock connectivity as offline to prevent cache fallback
-          connectivityProvider.overrideWith((ref) => MockConnectivityNotifier(ConnectivityStatus.offline)),
+          connectivityProvider.overrideWith(() => MockConnectivityNotifier()),
         ],
       );
 
@@ -492,7 +499,7 @@ void main() {
           secureStorageDataSourceProvider.overrideWith((ref) => mockSecureStorageDataSource),
           jwtTokenServiceProvider.overrideWith((ref) => mockJwtTokenService),
           // Mock connectivity as offline to prevent cache fallback
-          connectivityProvider.overrideWith((ref) => MockConnectivityNotifier(ConnectivityStatus.offline)),
+          connectivityProvider.overrideWith(() => MockConnectivityNotifier()),
         ],
       );
 
@@ -545,7 +552,7 @@ void main() {
           secureStorageDataSourceProvider.overrideWith((ref) => mockSecureStorageDataSource),
           jwtTokenServiceProvider.overrideWith((ref) => mockJwtTokenService),
           // Mock connectivity as online to allow cache fallback
-          connectivityProvider.overrideWith((ref) => MockConnectivityNotifier(ConnectivityStatus.online)),
+          connectivityProvider.overrideWith(() => MockConnectivityNotifier()),
         ],
       );
 

@@ -23,11 +23,11 @@ class _Paso1BoletaInicioScreenState extends ConsumerState<Paso1BoletaInicioScree
     // Cargar datos previos si existen
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = ref.read(boletaInicioDataProvider);
-      if (state.actor != null) {
-        _actorController.text = state.actor!;
+      if (state.value?.actor != null) {
+        _actorController.text = state.value!.actor!;
       }
-      if (state.demandado != null) {
-        _demandadoController.text = state.demandado!;
+      if (state.value?.demandado != null) {
+        _demandadoController.text = state.value!.demandado!;
       }
     });
   }

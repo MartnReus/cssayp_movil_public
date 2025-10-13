@@ -14,22 +14,24 @@ class BoletasRepositoryImpl implements BoletasRepository {
   });
 
   @override
-  Future<BoletaEntity> crearBoletaInicio({
+  Future<CrearBoletaInicioResult> crearBoletaInicio({
     required String caratula,
-    required int nroAfiliado,
-    required double monto,
+    required String juzgado,
+    required CircunscripcionEntity circunscripcion,
+    required TipoJuicioEntity tipoJuicio,
   }) async {
     try {
-      final digito = await jwtTokenService.obtenerDigito();
-      if (digito == null) {
-        throw Exception('No se pudo obtener el dígito del token de autenticación');
+      final token = await jwtTokenService.obtenerToken();
+      if (token == null) {
+        throw Exception('No se pudo obtener el token de autenticación');
       }
 
       final response = await boletasDataSource.crearBoletaInicio(
+        token: token,
         caratula: caratula,
-        nroAfiliado: nroAfiliado,
-        monto: monto,
-        digito: digito,
+        circunscripcion: circunscripcion,
+        juzgado: juzgado,
+        tipoJuicio: tipoJuicio,
       );
 
       if (response is! CrearBoletaSuccessResponse) {
@@ -38,32 +40,7 @@ class BoletasRepositoryImpl implements BoletasRepository {
         );
       }
 
-      final montoEntero = int.tryParse(response.montoEntero?.toString() ?? '0') ?? 0;
-      final montoDecimal = int.tryParse(response.montoDecimal?.toString() ?? '0') ?? 0;
-      final montoCalculado = montoEntero + (montoDecimal / 100);
-
-      final fechaImpresion = DateTime.tryParse(response.fechaImpresion) ?? DateTime.now();
-      final diasVencimiento = int.tryParse(response.fechaVencimiento) ?? 30;
-      final fechaVencimiento = fechaImpresion.add(Duration(days: diasVencimiento));
-
-      final boletaData = {
-        'id': response.idBoleta,
-        'tipo': 'inicio',
-        'monto': montoCalculado,
-        'fechaImpresion': response.fechaImpresion,
-        'fechaVencimiento': fechaVencimiento.toIso8601String(),
-        'codBarra': response.codBarra,
-        'idBoletaAsociada': response.idBoletaAsociada,
-        'fechaPago': response.fechaPago?.toIso8601String(),
-        'importePago': response.importePago,
-        'caratula': response.caratula,
-        'gastosAdministrativos': response.gastosAdministrativos,
-        'nroExpediente': null,
-        'anioExpediente': null,
-        'cuij': null,
-      };
-
-      return BoletaEntity.fromJson(boletaData);
+      return CrearBoletaInicioResult(idBoleta: response.idBoleta, urlPago: response.urlPago);
     } catch (e) {
       throw Exception('Error al crear boleta de inicio: $e');
     }
@@ -109,21 +86,39 @@ class BoletasRepositoryImpl implements BoletasRepository {
         );
       }
 
-      return BoletaEntity.fromCrearBoletaResponse(response.toJson());
+      final now = DateTime.now();
+      return BoletaEntity(
+        id: response.idBoleta,
+        tipo: BoletaTipo.finalizacion,
+        monto: monto,
+        fechaImpresion: now,
+        fechaVencimiento: now.add(const Duration(days: 30)),
+        caratula: caratula,
+        nroExpediente: nroExpediente,
+        anioExpediente: anioExpediente,
+        cuij: cuij,
+        codBarra: null,
+        gastosAdministrativos: null,
+        estado: '',
+      );
     } catch (e) {
       throw Exception('Error al crear boleta de finalización: $e');
     }
   }
 
   @override
-  Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(int nroAfiliado, {int? page}) async {
+  Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
+    int nroAfiliado, {
+    int? page,
+    int mostrarPagadas = 1,
+  }) async {
     try {
       // Intentar primero desde API
       try {
         final response = await boletasDataSource.obtenerHistorialBoletas(
           nroAfiliado: nroAfiliado,
           page: page,
-          mostrarPagadas: 1,
+          mostrarPagadas: mostrarPagadas,
         );
 
         if (response is HistorialBoletasSuccessResponse) {
@@ -162,16 +157,15 @@ class BoletasRepositoryImpl implements BoletasRepository {
     );
   }
 
-  /// TODO: implementar cuando haya una API para obtener los parámetros
-  // @override
-  // Future<ParametrosBoletaInicioEntity> obtenerParametrosBoletaInicio() async {
-  //   try {
-  //     final response = await boletasDataSource.obtenerParametrosBoletaInicio();
-  //     return ParametrosBoletaInicioEntity.fromJson(response);
-  //   } catch (e) {
-  //     throw Exception('Error al obtener parámetros de boleta de inicio: $e');
-  //   }
-  // }
+  @override
+  Future<ParametrosBoletaInicioEntity> obtenerParametrosBoletaInicio(int nroAfiliado) async {
+    try {
+      final response = await boletasDataSource.obtenerParametrosBoletaInicio(nroAfiliado);
+      return ParametrosBoletaInicioEntity.fromJson(response);
+    } catch (e) {
+      throw Exception('Error al obtener parámetros de boleta de inicio: $e');
+    }
+  }
 
   @override
   Future<PaginatedResponseModel> buscarBoletasInicioPagadas({

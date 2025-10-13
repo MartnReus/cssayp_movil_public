@@ -3,26 +3,17 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i7;
+import 'dart:async' as _i6;
 
 import 'package:cssayp_movil/auth/data/datasources/secure_storage_data_source.dart'
     as _i5;
-import 'package:cssayp_movil/boletas/data/datasources/boletas_data_source.dart'
-    as _i6;
-import 'package:cssayp_movil/boletas/data/datasources/boletas_local_data_source.dart'
-    as _i11;
-import 'package:cssayp_movil/boletas/data/models/crear_boleta_response_models.dart'
-    as _i8;
-import 'package:cssayp_movil/boletas/data/models/historial_boletas_response_models.dart'
-    as _i10;
+import 'package:cssayp_movil/boletas/boletas.dart' as _i4;
 import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart'
     as _i3;
-import 'package:cssayp_movil/boletas/domain/entities/boleta_entity.dart' as _i4;
-import 'package:cssayp_movil/boletas/domain/entities/boleta_tipo.dart' as _i12;
-import 'package:cssayp_movil/shared/services/jwt_token_service.dart' as _i13;
+import 'package:cssayp_movil/shared/services/jwt_token_service.dart' as _i8;
 import 'package:http/http.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:mockito/src/dummies.dart' as _i9;
+import 'package:mockito/src/dummies.dart' as _i7;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -63,7 +54,7 @@ class _FakeSecureStorageDataSource_3 extends _i1.SmartFake
 /// A class which mocks [BoletasDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
+class MockBoletasDataSource extends _i1.Mock implements _i4.BoletasDataSource {
   MockBoletasDataSource() {
     _i1.throwOnMissingStub(this);
   }
@@ -77,35 +68,38 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
           as _i2.Client);
 
   @override
-  _i7.Future<_i8.CrearBoletaResponse> crearBoletaInicio({
-    required int? nroAfiliado,
+  _i6.Future<_i4.CrearBoletaResponse> crearBoletaInicio({
+    required String? token,
     required String? caratula,
-    required double? monto,
-    required String? digito,
+    required String? juzgado,
+    required _i4.CircunscripcionEntity? circunscripcion,
+    required _i4.TipoJuicioEntity? tipoJuicio,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#crearBoletaInicio, [], {
-              #nroAfiliado: nroAfiliado,
+              #token: token,
               #caratula: caratula,
-              #monto: monto,
-              #digito: digito,
+              #juzgado: juzgado,
+              #circunscripcion: circunscripcion,
+              #tipoJuicio: tipoJuicio,
             }),
-            returnValue: _i7.Future<_i8.CrearBoletaResponse>.value(
-              _i9.dummyValue<_i8.CrearBoletaResponse>(
+            returnValue: _i6.Future<_i4.CrearBoletaResponse>.value(
+              _i7.dummyValue<_i4.CrearBoletaResponse>(
                 this,
                 Invocation.method(#crearBoletaInicio, [], {
-                  #nroAfiliado: nroAfiliado,
+                  #token: token,
                   #caratula: caratula,
-                  #monto: monto,
-                  #digito: digito,
+                  #juzgado: juzgado,
+                  #circunscripcion: circunscripcion,
+                  #tipoJuicio: tipoJuicio,
                 }),
               ),
             ),
           )
-          as _i7.Future<_i8.CrearBoletaResponse>);
+          as _i6.Future<_i4.CrearBoletaResponse>);
 
   @override
-  _i7.Future<_i8.CrearBoletaResponse> crearBoletaFinalizacion({
+  _i6.Future<_i4.CrearBoletaResponse> crearBoletaFinalizacion({
     required int? nroAfiliado,
     required String? digito,
     required String? caratula,
@@ -134,8 +128,8 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
               #anioExpediente: anioExpediente,
               #cuij: cuij,
             }),
-            returnValue: _i7.Future<_i8.CrearBoletaResponse>.value(
-              _i9.dummyValue<_i8.CrearBoletaResponse>(
+            returnValue: _i6.Future<_i4.CrearBoletaResponse>.value(
+              _i7.dummyValue<_i4.CrearBoletaResponse>(
                 this,
                 Invocation.method(#crearBoletaFinalizacion, [], {
                   #nroAfiliado: nroAfiliado,
@@ -154,10 +148,10 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
               ),
             ),
           )
-          as _i7.Future<_i8.CrearBoletaResponse>);
+          as _i6.Future<_i4.CrearBoletaResponse>);
 
   @override
-  _i7.Future<_i10.HistorialBoletasResponse> obtenerHistorialBoletas({
+  _i6.Future<_i4.HistorialBoletasResponse> obtenerHistorialBoletas({
     required int? nroAfiliado,
     int? page,
     int? mostrarPagadas = 1,
@@ -168,8 +162,8 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
               #page: page,
               #mostrarPagadas: mostrarPagadas,
             }),
-            returnValue: _i7.Future<_i10.HistorialBoletasResponse>.value(
-              _i9.dummyValue<_i10.HistorialBoletasResponse>(
+            returnValue: _i6.Future<_i4.HistorialBoletasResponse>.value(
+              _i7.dummyValue<_i4.HistorialBoletasResponse>(
                 this,
                 Invocation.method(#obtenerHistorialBoletas, [], {
                   #nroAfiliado: nroAfiliado,
@@ -179,10 +173,22 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
               ),
             ),
           )
-          as _i7.Future<_i10.HistorialBoletasResponse>);
+          as _i6.Future<_i4.HistorialBoletasResponse>);
 
   @override
-  _i7.Future<_i3.PaginatedResponseModel> buscarBoletasInicioPagadas({
+  _i6.Future<Map<String, dynamic>> obtenerParametrosBoletaInicio(
+    int? nroAfiliado,
+  ) =>
+      (super.noSuchMethod(
+            Invocation.method(#obtenerParametrosBoletaInicio, [nroAfiliado]),
+            returnValue: _i6.Future<Map<String, dynamic>>.value(
+              <String, dynamic>{},
+            ),
+          )
+          as _i6.Future<Map<String, dynamic>>);
+
+  @override
+  _i6.Future<_i3.PaginatedResponseModel> buscarBoletasInicioPagadas({
     required int? nroAfiliado,
     int? page = 1,
     String? caratulaBuscada,
@@ -193,7 +199,7 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
               #page: page,
               #caratulaBuscada: caratulaBuscada,
             }),
-            returnValue: _i7.Future<_i3.PaginatedResponseModel>.value(
+            returnValue: _i6.Future<_i3.PaginatedResponseModel>.value(
               _FakePaginatedResponseModel_1(
                 this,
                 Invocation.method(#buscarBoletasInicioPagadas, [], {
@@ -204,29 +210,29 @@ class MockBoletasDataSource extends _i1.Mock implements _i6.BoletasDataSource {
               ),
             ),
           )
-          as _i7.Future<_i3.PaginatedResponseModel>);
+          as _i6.Future<_i3.PaginatedResponseModel>);
 }
 
 /// A class which mocks [BoletasLocalDataSource].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockBoletasLocalDataSource extends _i1.Mock
-    implements _i11.BoletasLocalDataSource {
+    implements _i4.BoletasLocalDataSource {
   MockBoletasLocalDataSource() {
     _i1.throwOnMissingStub(this);
   }
 
   @override
-  _i7.Future<void> guardarBoletas(List<_i4.BoletaEntity>? boletas) =>
+  _i6.Future<void> guardarBoletas(List<_i4.BoletaEntity>? boletas) =>
       (super.noSuchMethod(
             Invocation.method(#guardarBoletas, [boletas]),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i6.Future<void>);
 
   @override
-  _i7.Future<List<_i4.BoletaEntity>> obtenerBoletasLocales({
+  _i6.Future<List<_i4.BoletaEntity>> obtenerBoletasLocales({
     int? limit,
     int? offset,
     String? caratulaFiltro,
@@ -237,46 +243,46 @@ class MockBoletasLocalDataSource extends _i1.Mock
               #offset: offset,
               #caratulaFiltro: caratulaFiltro,
             }),
-            returnValue: _i7.Future<List<_i4.BoletaEntity>>.value(
+            returnValue: _i6.Future<List<_i4.BoletaEntity>>.value(
               <_i4.BoletaEntity>[],
             ),
           )
-          as _i7.Future<List<_i4.BoletaEntity>>);
+          as _i6.Future<List<_i4.BoletaEntity>>);
 
   @override
-  _i7.Future<int> obtenerConteoBoletasLocales({String? caratulaFiltro}) =>
+  _i6.Future<int> obtenerConteoBoletasLocales({String? caratulaFiltro}) =>
       (super.noSuchMethod(
             Invocation.method(#obtenerConteoBoletasLocales, [], {
               #caratulaFiltro: caratulaFiltro,
             }),
-            returnValue: _i7.Future<int>.value(0),
+            returnValue: _i6.Future<int>.value(0),
           )
-          as _i7.Future<int>);
+          as _i6.Future<int>);
 
   @override
-  _i7.Future<void> limpiarCache() =>
+  _i6.Future<void> limpiarCache() =>
       (super.noSuchMethod(
             Invocation.method(#limpiarCache, []),
-            returnValue: _i7.Future<void>.value(),
-            returnValueForMissingStub: _i7.Future<void>.value(),
+            returnValue: _i6.Future<void>.value(),
+            returnValueForMissingStub: _i6.Future<void>.value(),
           )
-          as _i7.Future<void>);
+          as _i6.Future<void>);
 
   @override
-  _i7.Future<DateTime?> obtenerUltimaSincronizacion() =>
+  _i6.Future<DateTime?> obtenerUltimaSincronizacion() =>
       (super.noSuchMethod(
             Invocation.method(#obtenerUltimaSincronizacion, []),
-            returnValue: _i7.Future<DateTime?>.value(),
+            returnValue: _i6.Future<DateTime?>.value(),
           )
-          as _i7.Future<DateTime?>);
+          as _i6.Future<DateTime?>);
 
   @override
-  _i7.Future<bool> tieneBoletasEnCache() =>
+  _i6.Future<bool> tieneBoletasEnCache() =>
       (super.noSuchMethod(
             Invocation.method(#tieneBoletasEnCache, []),
-            returnValue: _i7.Future<bool>.value(false),
+            returnValue: _i6.Future<bool>.value(false),
           )
-          as _i7.Future<bool>);
+          as _i6.Future<bool>);
 
   @override
   Map<String, dynamic> boletaToMap(_i4.BoletaEntity? boleta) =>
@@ -298,18 +304,18 @@ class MockBoletasLocalDataSource extends _i1.Mock
           as _i4.BoletaEntity);
 
   @override
-  _i12.BoletaTipo stringToBoletaTipo(String? tipo) =>
+  _i4.BoletaTipo stringToBoletaTipo(String? tipo) =>
       (super.noSuchMethod(
             Invocation.method(#stringToBoletaTipo, [tipo]),
-            returnValue: _i12.BoletaTipo.inicio,
+            returnValue: _i4.BoletaTipo.inicio,
           )
-          as _i12.BoletaTipo);
+          as _i4.BoletaTipo);
 }
 
 /// A class which mocks [JwtTokenService].
 ///
 /// See the documentation for Mockito's code generation for more information.
-class MockJwtTokenService extends _i1.Mock implements _i13.JwtTokenService {
+class MockJwtTokenService extends _i1.Mock implements _i8.JwtTokenService {
   MockJwtTokenService() {
     _i1.throwOnMissingStub(this);
   }
@@ -326,34 +332,42 @@ class MockJwtTokenService extends _i1.Mock implements _i13.JwtTokenService {
           as _i5.SecureStorageDataSource);
 
   @override
-  _i7.Future<String?> obtenerCampo(String? campo) =>
+  _i6.Future<String?> obtenerToken() =>
+      (super.noSuchMethod(
+            Invocation.method(#obtenerToken, []),
+            returnValue: _i6.Future<String?>.value(),
+          )
+          as _i6.Future<String?>);
+
+  @override
+  _i6.Future<String?> obtenerCampo(String? campo) =>
       (super.noSuchMethod(
             Invocation.method(#obtenerCampo, [campo]),
-            returnValue: _i7.Future<String?>.value(),
+            returnValue: _i6.Future<String?>.value(),
           )
-          as _i7.Future<String?>);
+          as _i6.Future<String?>);
 
   @override
-  _i7.Future<String?> obtenerDigito() =>
+  _i6.Future<String?> obtenerDigito() =>
       (super.noSuchMethod(
             Invocation.method(#obtenerDigito, []),
-            returnValue: _i7.Future<String?>.value(),
+            returnValue: _i6.Future<String?>.value(),
           )
-          as _i7.Future<String?>);
+          as _i6.Future<String?>);
 
   @override
-  _i7.Future<String?> obtenerNumeroAfiliado() =>
+  _i6.Future<String?> obtenerNumeroAfiliado() =>
       (super.noSuchMethod(
             Invocation.method(#obtenerNumeroAfiliado, []),
-            returnValue: _i7.Future<String?>.value(),
+            returnValue: _i6.Future<String?>.value(),
           )
-          as _i7.Future<String?>);
+          as _i6.Future<String?>);
 
   @override
-  _i7.Future<Map<String, dynamic>?> obtenerPayloadCompleto() =>
+  _i6.Future<Map<String, dynamic>?> obtenerPayloadCompleto() =>
       (super.noSuchMethod(
             Invocation.method(#obtenerPayloadCompleto, []),
-            returnValue: _i7.Future<Map<String, dynamic>?>.value(),
+            returnValue: _i6.Future<Map<String, dynamic>?>.value(),
           )
-          as _i7.Future<Map<String, dynamic>?>);
+          as _i6.Future<Map<String, dynamic>?>);
 }

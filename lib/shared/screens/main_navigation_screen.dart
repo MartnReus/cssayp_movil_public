@@ -1,13 +1,6 @@
 import 'package:cssayp_movil/auth/auth.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/historial_screen.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/boleta_generada.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_screen.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_inicio_pasos/boleta_inicio_paso1.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_inicio_pasos/boleta_inicio_paso2.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_inicio_pasos/boleta_inicio_paso3.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_fin_pasos/boleta_fin_paso1.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_fin_pasos/boleta_fin_paso2.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/crear_boleta_fin_pasos/boleta_fin_paso3.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/pagos/presentation/screens/pagos_principal_screen.dart';
 import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 import 'package:cssayp_movil/shared/screens/proximamente_screen.dart';
 import 'package:flutter/material.dart';
@@ -21,27 +14,22 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
-  final List<GlobalKey<NavigatorState>> _navigationKeys = [
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-    GlobalKey<NavigatorState>(),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final currentIndex = ref.watch(navigationProvider);
+    final currentIndex = ref.watch(navigationProvider).index;
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        final navigator = _navigationKeys[currentIndex].currentState;
 
-        if (navigator != null && navigator.canPop()) {
+        final navigator = ref.watch(navigationProvider).navigatorState;
+        if (navigator == null) return;
+
+        if (navigator.canPop()) {
           navigator.pop();
         } else {
-          // Si no hay mas rutas en el stack actual, volver al home
+          // Si no hay más rutas en el stack actual, volver al home
           if (currentIndex > 0) {
             ref.read(navigationProvider.notifier).selectTab(0);
           } else {
@@ -62,7 +50,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
           child: NavigationBar(
             selectedIndex: currentIndex,
             onDestinationSelected: (index) {
-              ref.read(navigationProvider.notifier).selectTab(index);
+              final currentIndex = ref.read(navigationProvider).index;
+              final routeName = currentIndex != index ? ref.read(navigationProvider).routeName : '/';
+              ref.read(navigationProvider.notifier).selectTab(index, routeName: routeName ?? '/');
             },
             destinations: [
               NavigationDestination(
@@ -93,8 +83,9 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   }
 
   Widget _buildNavigator(int index) {
+    final navigationKeys = ref.read(navigationProvider).navigationKeys;
     return Navigator(
-      key: _navigationKeys[index],
+      key: navigationKeys[index],
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(builder: (context) => _buildRouteForTab(index, settings));
       },
@@ -102,11 +93,27 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   }
 
   Widget _buildRouteForTab(int index, RouteSettings settings) {
+    final int currentIndex = ref.read(navigationProvider).index;
+    if (currentIndex != index) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF173664))),
+      );
+    }
+
     switch (index) {
       case 0: // Home
         switch (settings.name) {
+          default:
+            return const HomeScreen();
+        }
+      case 1: // Historial Boletas
+        switch (settings.name) {
           case '/crear-boleta':
             return const CrearBoletaScreen();
+          case '/boleta-generada':
+            final args = settings.arguments as BoletaEntity?;
+            return BoletaCreadaScreen(boleta: args);
           case '/boleta-inicio-paso1':
             return const Paso1BoletaInicioScreen();
           case '/boleta-inicio-paso2':
@@ -119,19 +126,17 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             return const Paso2BoletaFinScreen();
           case '/boleta-fin-paso3':
             return const Paso3BoletaFinScreen();
-          case '/boleta-generada':
-            return const BoletaCreadaScreen();
-          default:
-            return const HomeScreen();
-        }
-      case 1: // Historial Boletas
-        switch (settings.name) {
-          case '/boleta-generada':
-            return const BoletaCreadaScreen();
           default:
             return const HistorialScreen();
         }
       case 2: // Pagos
+        switch (settings.name) {
+          case '/procesar-pago':
+            // Aquí se pasaría la lista de boletas seleccionadas
+            return const PagosPrincipalScreen();
+          default:
+            return const PagosPrincipalScreen();
+        }
       case 3: // Más
         return const ProximamenteScreen();
       default:

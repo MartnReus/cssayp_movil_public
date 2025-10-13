@@ -1,11 +1,10 @@
 import 'package:cssayp_movil/auth/auth.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/shared/screens/main_navigation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/boleta_generada.dart';
-import 'package:cssayp_movil/boletas/presentation/screens/historial_screen.dart';
 import 'package:cssayp_movil/shared/providers/connectivity_provider.dart';
 import 'package:cssayp_movil/shared/widgets/offline_notification.dart';
 
@@ -32,7 +31,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connectivityStatus = ref.watch(connectivityProvider);
-    final isOffline = connectivityStatus == ConnectivityStatus.offline;
+    final isOffline = connectivityStatus.value == ConnectivityStatus.offline;
 
     return MaterialApp(
       title: 'CSSAyP',
@@ -54,7 +53,10 @@ class MyApp extends ConsumerWidget {
         '/cambiar-password': (context) => CambiarPasswordScreen(),
         '/enviar-email': (context) => EnvioEmailScreen(),
         '/password-actualizada': (context) => PasswordActualizadaScreen(),
-        '/boleta-generada': (context) => BoletaCreadaScreen(),
+        '/boleta-generada': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as BoletaEntity?;
+          return BoletaCreadaScreen(boleta: args);
+        },
         '/historial_boletas_juicios': (context) => HistorialScreen(),
       },
       builder: (context, child) {

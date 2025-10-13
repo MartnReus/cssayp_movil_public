@@ -1,6 +1,5 @@
 import 'package:cssayp_movil/auth/auth.dart';
-import 'package:cssayp_movil/boletas/domain/entities/boleta_entity.dart';
-import 'package:cssayp_movil/boletas/domain/repositories/boletas_repository.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
 
 class GenerarBoletaInicioUseCase {
   final BoletasRepository boletasRepository;
@@ -8,7 +7,12 @@ class GenerarBoletaInicioUseCase {
 
   GenerarBoletaInicioUseCase({required this.boletasRepository, required this.usuarioRepository});
 
-  Future<BoletaEntity> execute({required String caratula, required double monto}) async {
+  Future<CrearBoletaInicioResult> execute({
+    required String caratula,
+    required CircunscripcionEntity circunscripcion,
+    required TipoJuicioEntity tipoJuicio,
+    required String juzgado,
+  }) async {
     final usuario = await usuarioRepository.obtenerUsuarioActual();
 
     if (usuario == null) {
@@ -17,8 +21,9 @@ class GenerarBoletaInicioUseCase {
 
     return await boletasRepository.crearBoletaInicio(
       caratula: caratula,
-      monto: monto,
-      nroAfiliado: usuario.nroAfiliado,
+      circunscripcion: circunscripcion,
+      juzgado: juzgado,
+      tipoJuicio: tipoJuicio,
     );
   }
 }

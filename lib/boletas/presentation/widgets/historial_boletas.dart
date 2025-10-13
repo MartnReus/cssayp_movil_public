@@ -4,6 +4,8 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:intl/intl.dart';
 
 import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/pagos/pagos.dart';
+import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 
 class HistorialBoletasWidget extends ConsumerStatefulWidget {
   const HistorialBoletasWidget({super.key});
@@ -65,6 +67,7 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
     }
 
     return BoletaHistorial(
+      id: entity.id,
       caratula: entity.caratula,
       fecha: entity.fechaImpresion,
       tipo: tipo,
@@ -79,6 +82,17 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('dd/MM/yyyy', 'es_AR');
     final moneyFmt = NumberFormat.currency(locale: 'es_AR', symbol: '\$');
+
+    final currentTabIndex = ref.watch(navigationProvider).index;
+    final isHistorialTabVisible = currentTabIndex == 1;
+
+    if (!isHistorialTabVisible) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFEEF9FF),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF173664))),
+      );
+    }
+
     final boletasAsyncValue = ref.watch(boletasProvider);
 
     return Scaffold(
@@ -280,10 +294,7 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                                 isActive: b.estado == EstadoBoleta.pendiente, // Solo activo si está pendiente
                                 onTap: b.estado == EstadoBoleta.pendiente
                                     ? () {
-                                        // TODO: redirigir a pantalla de pago
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Redirigiendo a pantalla de pago...')),
-                                        );
+                                        _navegarAPago(b);
                                       }
                                     : () {},
                               ),
@@ -515,6 +526,20 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
     }
   }
 
+  /// Navega a la pantalla de procesamiento de pago
+  void _navegarAPago(BoletaHistorial boletaHistorial) {
+    final boletasState = ref.read(boletasProvider);
+    final boletas = boletasState.value?.boletas;
+
+    if (boletas == null || boletas.isEmpty) {
+      return;
+    }
+
+    final boletaEntity = boletas.firstWhere((boleta) => boleta.id == boletaHistorial.id);
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProcesarPagoScreen(boletas: [boletaEntity])));
+  }
+
   Widget _accion({required IconData icon, required String label, required VoidCallback onTap, bool isActive = true}) {
     return Expanded(
       child: InkWell(
@@ -555,6 +580,7 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
 }
 
 class BoletaHistorial {
+  final int id;
   final String caratula;
   final DateTime fecha;
   final String tipo; // 'Inicio' | 'Fin'
@@ -564,6 +590,7 @@ class BoletaHistorial {
   final DateTime? fechaPago; // null si no está pagada
 
   BoletaHistorial({
+    required this.id,
     required this.caratula,
     required this.fecha,
     required this.tipo,

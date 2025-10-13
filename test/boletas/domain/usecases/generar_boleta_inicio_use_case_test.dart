@@ -4,10 +4,7 @@ import 'package:mockito/mockito.dart';
 
 import 'package:cssayp_movil/auth/domain/entities/usuario_entity.dart';
 import 'package:cssayp_movil/auth/domain/repositories/usuario_repository.dart';
-import 'package:cssayp_movil/boletas/domain/entities/boleta_entity.dart';
-import 'package:cssayp_movil/boletas/domain/entities/boleta_tipo.dart';
-import 'package:cssayp_movil/boletas/domain/repositories/boletas_repository.dart';
-import 'package:cssayp_movil/boletas/domain/usecases/generar_boleta_inicio_use_case.dart';
+import 'package:cssayp_movil/boletas/boletas.dart';
 
 import 'generar_boleta_inicio_use_case_test.mocks.dart';
 
@@ -28,7 +25,7 @@ void main() {
 
   group('GenerarBoletaInicioUseCase', () {
     const String caratula = 'Test Caratula';
-    const double monto = 1000.50;
+    const String juzgado = 'Juzgado Test';
     const int nroAfiliado = 12345;
 
     final UsuarioEntity usuarioMock = UsuarioEntity(
@@ -38,30 +35,48 @@ void main() {
       username: 'testuser',
     );
 
-    final BoletaEntity boletaMock = BoletaEntity(
-      id: 1,
-      tipo: BoletaTipo.inicio,
-      monto: monto,
-      fechaImpresion: DateTime(2024, 1, 1),
-      fechaVencimiento: DateTime(2024, 1, 31),
-      caratula: caratula,
+    final CircunscripcionEntity circunscripcionMock = CircunscripcionEntity(
+      id: '1',
+      descripcion: 'Circunscripción Test',
+    );
+
+    final TipoJuicioEntity tipoJuicioMock = TipoJuicioEntity(id: '1', descripcion: 'Tipo Juicio Test');
+
+    final CrearBoletaInicioResult resultadoMock = CrearBoletaInicioResult(
+      idBoleta: 1,
+      urlPago: 'https://test.com/pago',
     );
 
     test('debería generar una boleta de inicio exitosamente cuando hay usuario autenticado', () async {
       // Arrange
       when(mockUsuarioRepository.obtenerUsuarioActual()).thenAnswer((_) async => usuarioMock);
       when(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratula, monto: monto, nroAfiliado: nroAfiliado),
-      ).thenAnswer((_) async => boletaMock);
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
+      ).thenAnswer((_) async => resultadoMock);
 
       // Act
-      final result = await useCase.execute(caratula: caratula, monto: monto);
+      final result = await useCase.execute(
+        caratula: caratula,
+        juzgado: juzgado,
+        circunscripcion: circunscripcionMock,
+        tipoJuicio: tipoJuicioMock,
+      );
 
       // Assert
-      expect(result, equals(boletaMock));
+      expect(result, equals(resultadoMock));
       verify(mockUsuarioRepository.obtenerUsuarioActual()).called(1);
       verify(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratula, monto: monto, nroAfiliado: nroAfiliado),
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
       ).called(1);
     });
 
@@ -71,7 +86,12 @@ void main() {
 
       // Act & Assert
       expect(
-        () => useCase.execute(caratula: caratula, monto: monto),
+        () => useCase.execute(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
         throwsA(isA<Exception>().having((e) => e.toString(), 'message', contains('No hay usuario autenticado'))),
       );
 
@@ -79,8 +99,9 @@ void main() {
       verifyNever(
         mockBoletasRepository.crearBoletaInicio(
           caratula: anyNamed('caratula'),
-          monto: anyNamed('monto'),
-          nroAfiliado: anyNamed('nroAfiliado'),
+          juzgado: anyNamed('juzgado'),
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
         ),
       );
     });
@@ -89,12 +110,22 @@ void main() {
       // Arrange
       when(mockUsuarioRepository.obtenerUsuarioActual()).thenAnswer((_) async => usuarioMock);
       when(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratula, monto: monto, nroAfiliado: nroAfiliado),
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
       ).thenThrow(Exception('Error del repositorio'));
 
       // Act & Assert
       try {
-        await useCase.execute(caratula: caratula, monto: monto);
+        await useCase.execute(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        );
         fail('Se esperaba que se lance una excepción');
       } catch (e) {
         expect(e, isA<Exception>());
@@ -103,7 +134,12 @@ void main() {
 
       verify(mockUsuarioRepository.obtenerUsuarioActual()).called(1);
       verify(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratula, monto: monto, nroAfiliado: nroAfiliado),
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
       ).called(1);
     });
 
@@ -113,7 +149,12 @@ void main() {
 
       // Act & Assert
       try {
-        await useCase.execute(caratula: caratula, monto: monto);
+        await useCase.execute(
+          caratula: caratula,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        );
         fail('Se esperaba que se lance una excepción');
       } catch (e) {
         expect(e, isA<Exception>());
@@ -124,27 +165,43 @@ void main() {
       verifyNever(
         mockBoletasRepository.crearBoletaInicio(
           caratula: anyNamed('caratula'),
-          monto: anyNamed('monto'),
-          nroAfiliado: anyNamed('nroAfiliado'),
+          juzgado: anyNamed('juzgado'),
+          circunscripcion: anyNamed('circunscripcion'),
+          tipoJuicio: anyNamed('tipoJuicio'),
         ),
       );
     });
 
-    test('debería manejar correctamente diferentes valores de monto', () async {
+    test('debería manejar correctamente diferentes valores de juzgado', () async {
       // Arrange
-      const double montoDecimal = 1234.56;
+      const String juzgadoEspecial = 'Juzgado Especial N° 1';
       when(mockUsuarioRepository.obtenerUsuarioActual()).thenAnswer((_) async => usuarioMock);
       when(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratula, monto: montoDecimal, nroAfiliado: nroAfiliado),
-      ).thenAnswer((_) async => boletaMock);
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratula,
+          juzgado: juzgadoEspecial,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
+      ).thenAnswer((_) async => resultadoMock);
 
       // Act
-      final result = await useCase.execute(caratula: caratula, monto: montoDecimal);
+      final result = await useCase.execute(
+        caratula: caratula,
+        juzgado: juzgadoEspecial,
+        circunscripcion: circunscripcionMock,
+        tipoJuicio: tipoJuicioMock,
+      );
 
       // Assert
-      expect(result, equals(boletaMock));
+      expect(result, equals(resultadoMock));
       verify(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratula, monto: montoDecimal, nroAfiliado: nroAfiliado),
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratula,
+          juzgado: juzgadoEspecial,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
       ).called(1);
     });
 
@@ -153,16 +210,31 @@ void main() {
       const String caratulaEspecial = 'C/12345/2024 - JUAN PEREZ C/ EMPRESA S.A.';
       when(mockUsuarioRepository.obtenerUsuarioActual()).thenAnswer((_) async => usuarioMock);
       when(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratulaEspecial, monto: monto, nroAfiliado: nroAfiliado),
-      ).thenAnswer((_) async => boletaMock);
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratulaEspecial,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
+      ).thenAnswer((_) async => resultadoMock);
 
       // Act
-      final result = await useCase.execute(caratula: caratulaEspecial, monto: monto);
+      final result = await useCase.execute(
+        caratula: caratulaEspecial,
+        juzgado: juzgado,
+        circunscripcion: circunscripcionMock,
+        tipoJuicio: tipoJuicioMock,
+      );
 
       // Assert
-      expect(result, equals(boletaMock));
+      expect(result, equals(resultadoMock));
       verify(
-        mockBoletasRepository.crearBoletaInicio(caratula: caratulaEspecial, monto: monto, nroAfiliado: nroAfiliado),
+        mockBoletasRepository.crearBoletaInicio(
+          caratula: caratulaEspecial,
+          juzgado: juzgado,
+          circunscripcion: circunscripcionMock,
+          tipoJuicio: tipoJuicioMock,
+        ),
       ).called(1);
     });
   });

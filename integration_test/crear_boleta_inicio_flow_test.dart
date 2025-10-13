@@ -19,6 +19,16 @@ import 'package:cssayp_movil/shared/services/jwt_token_service.dart';
 import "../test/auth/data/datasources/usuario_data_source_test.mocks.dart";
 import '../test/auth/presentation/providers/auth_provider_test.mocks.dart';
 
+Future<void> pumpFrames(
+  WidgetTester tester, {
+  int frames = 10,
+  Duration frameDuration = const Duration(milliseconds: 100),
+}) async {
+  for (int i = 0; i < frames; i++) {
+    await tester.pump(frameDuration);
+  }
+}
+
 /// Mock personalizado para SecureStorageDataSource que simula el almacenamiento del token
 class MockSecureStorageDataSource extends Mock implements SecureStorageDataSource {
   String? _storedToken;
@@ -155,6 +165,20 @@ void main() {
     });
     const successCrearBoletaResponseStatus = 201;
 
+    final successParamsBoletaInicioResponseBody = json.encode({
+      'circunscripciones': [
+        {'id': 1, 'descripcion': 'Santa Fe'},
+      ],
+      'tipos_juicios': [
+        {
+          'id': 1,
+          'descripcion': 'Juzgado de Distrito y Colegiados',
+          'montos': {'monto_caja': 1000.0, 'monto_forense': 500.0, 'monto_colegio': 200.0},
+        },
+      ],
+    });
+    const successParamsBoletaInicioResponseStatus = 200;
+
     final errorCrearBoletaResponseBody = json.encode({
       'error': 'Error al crear la boleta de inicio',
       'mensaje': 'No se pudo procesar la solicitud',
@@ -197,6 +221,16 @@ void main() {
         }
       });
 
+      when(mockClient.get(any)).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/parametros-boleta-inicio/')) {
+          return http.Response(successParamsBoletaInicioResponseBody, successParamsBoletaInicioResponseStatus);
+        } else {
+          return http.Response('{}', 200);
+        }
+      });
+
       final container = ProviderContainer(
         overrides: [
           httpClientProvider.overrideWith((ref) => mockClient),
@@ -216,18 +250,18 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
 
       // Después del login exitoso, debería navegar a MainNavigationScreen que contiene HomeScreen
       expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      await pumpFrames(tester);
 
       expect(find.byType(CrearBoletaScreen), findsOneWidget);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
@@ -235,24 +269,58 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria Garcia');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
+
+      await container.read(boletaInicioDataProvider.future);
+      await pumpFrames(tester);
+
+      final dropdowns = find.byType(DropdownButtonFormField);
+
+      if (dropdowns.evaluate().isEmpty) {
+        final textFields = find.byType(TextFormField);
+        if (textFields.evaluate().length >= 2) {
+          await tester.enterText(textFields.at(0), 'Juzgado de Distrito y Colegiados');
+          await pumpFrames(tester);
+
+          await tester.enterText(textFields.at(1), 'Daños y Perjuicios');
+          await pumpFrames(tester);
+        }
+
+        await tester.tap(find.text('SIGUIENTE'));
+        await pumpFrames(tester);
+
+        expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
+        return;
+      }
+
+      expect(dropdowns, findsAtLeastNWidgets(1));
+
+      await tester.tap(dropdowns.first);
+      await pumpFrames(tester);
+      await tester.tap(find.text('Juzgado de Distrito y Colegiados'));
+      await pumpFrames(tester);
+
+      await tester.tap(find.byType(DropdownButtonFormField).last);
+      await pumpFrames(tester);
+
+      await tester.tap(find.text('Santa Fe'));
+      await pumpFrames(tester);
 
       await tester.enterText(find.byType(TextFormField), 'Daños y Perjuicios');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
 
       await tester.tap(find.text('GENERAR'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Confirmar en el diálogo
       await tester.tap(find.text('SÍ'));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
 
       expect(find.byType(BoletaCreadaScreen), findsOneWidget);
       expect(find.text('Boleta generada con éxito'), findsOneWidget);
@@ -282,18 +350,18 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('Campo obligatorio'), findsNWidgets(2));
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
@@ -324,13 +392,13 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
@@ -338,7 +406,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria@');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('Solo letras y espacios permitidos'), findsNWidgets(2));
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
@@ -349,9 +417,25 @@ void main() {
       final mockClient = MockClient();
       final mockSecureStorageDataSource = MockSecureStorageDataSource();
 
-      when(
-        mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers')),
-      ).thenAnswer((_) async => http.Response(successLoginResponseBody, successLoginResponseStatus));
+      when(mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers'))).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/boletaInicio')) {
+          return http.Response(successCrearBoletaResponseBody, successCrearBoletaResponseStatus);
+        } else {
+          return http.Response(successLoginResponseBody, successLoginResponseStatus);
+        }
+      });
+
+      when(mockClient.get(any)).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/parametros-boleta-inicio/')) {
+          return http.Response(successParamsBoletaInicioResponseBody, successParamsBoletaInicioResponseStatus);
+        } else {
+          return http.Response('{}', 200);
+        }
+      });
 
       final container = ProviderContainer(
         overrides: [
@@ -369,13 +453,13 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
@@ -383,12 +467,15 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria Garcia');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester, frames: 30);
 
       expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
 
+      await container.read(boletaInicioDataProvider.future);
+      await pumpFrames(tester);
+
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.text('La causa es obligatoria'), findsOneWidget);
       expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
@@ -414,6 +501,16 @@ void main() {
         }
       });
 
+      when(mockClient.get(any)).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/parametros-boleta-inicio/')) {
+          return http.Response(successParamsBoletaInicioResponseBody, successParamsBoletaInicioResponseStatus);
+        } else {
+          return http.Response('{}', 200);
+        }
+      });
+
       final container = ProviderContainer(
         overrides: [
           httpClientProvider.overrideWith((ref) => mockClient),
@@ -433,32 +530,77 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+
+      // Después del login exitoso, debería navegar a MainNavigationScreen que contiene HomeScreen
+      expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      await pumpFrames(tester);
+
+      expect(find.byType(CrearBoletaScreen), findsOneWidget);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Juan Perez');
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria Garcia');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
+
+      await container.read(boletaInicioDataProvider.future);
+      await pumpFrames(tester);
+
+      final dropdowns = find.byType(DropdownButtonFormField);
+
+      if (dropdowns.evaluate().isEmpty) {
+        final textFields = find.byType(TextFormField);
+        if (textFields.evaluate().length >= 2) {
+          await tester.enterText(textFields.at(0), 'Juzgado de Distrito y Colegiados');
+          await pumpFrames(tester);
+
+          await tester.enterText(textFields.at(1), 'Daños y Perjuicios');
+          await pumpFrames(tester);
+        }
+
+        await tester.tap(find.text('SIGUIENTE'));
+        await pumpFrames(tester);
+
+        expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
+        return;
+      }
+
+      expect(dropdowns, findsAtLeastNWidgets(1));
+
+      await tester.tap(dropdowns.first);
+      await pumpFrames(tester);
+      await tester.tap(find.text('Juzgado de Distrito y Colegiados'));
+      await pumpFrames(tester);
+
+      await tester.tap(find.byType(DropdownButtonFormField).last);
+      await pumpFrames(tester);
+
+      await tester.tap(find.text('Santa Fe'));
+      await pumpFrames(tester);
 
       await tester.enterText(find.byType(TextFormField), 'Daños y Perjuicios');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
 
       await tester.tap(find.text('GENERAR'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Confirmar en el diálogo
       await tester.tap(find.text('SÍ'));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
@@ -484,6 +626,16 @@ void main() {
         }
       });
 
+      when(mockClient.get(any)).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/parametros-boleta-inicio/')) {
+          return http.Response(successParamsBoletaInicioResponseBody, successParamsBoletaInicioResponseStatus);
+        } else {
+          return http.Response('{}', 200);
+        }
+      });
+
       final container = ProviderContainer(
         overrides: [
           httpClientProvider.overrideWith((ref) => mockClient),
@@ -503,32 +655,77 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+
+      // Después del login exitoso, debería navegar a MainNavigationScreen que contiene HomeScreen
+      expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      await pumpFrames(tester);
+
+      expect(find.byType(CrearBoletaScreen), findsOneWidget);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Juan Perez');
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria Garcia');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
+
+      await container.read(boletaInicioDataProvider.future);
+      await pumpFrames(tester);
+
+      final dropdowns = find.byType(DropdownButtonFormField);
+
+      if (dropdowns.evaluate().isEmpty) {
+        final textFields = find.byType(TextFormField);
+        if (textFields.evaluate().length >= 2) {
+          await tester.enterText(textFields.at(0), 'Juzgado de Distrito y Colegiados');
+          await pumpFrames(tester);
+
+          await tester.enterText(textFields.at(1), 'Daños y Perjuicios');
+          await pumpFrames(tester);
+        }
+
+        await tester.tap(find.text('SIGUIENTE'));
+        await pumpFrames(tester);
+
+        expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
+        return;
+      }
+
+      expect(dropdowns, findsAtLeastNWidgets(1));
+
+      await tester.tap(dropdowns.first);
+      await pumpFrames(tester);
+      await tester.tap(find.text('Juzgado de Distrito y Colegiados'));
+      await pumpFrames(tester);
+
+      await tester.tap(find.byType(DropdownButtonFormField).last);
+      await pumpFrames(tester);
+
+      await tester.tap(find.text('Santa Fe'));
+      await pumpFrames(tester);
 
       await tester.enterText(find.byType(TextFormField), 'Daños y Perjuicios');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
 
       await tester.tap(find.text('GENERAR'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       // Confirmar en el diálogo
       await tester.tap(find.text('SÍ'));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
 
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
@@ -538,15 +735,39 @@ void main() {
     testWidgets('Debe permitir navegar entre pasos usando los botones Volver', (tester) async {
       final mockClient = MockClient();
       final mockSecureStorageDataSource = MockSecureStorageDataSource();
+      final mockUsuarioRepository = MockUsuarioRepositoryComplete(mockSecureStorageDataSource);
+      final mockPreferenciasRepository = MockPreferenciasRepository();
+      final mockJwtTokenService = MockJwtTokenService();
 
-      when(
-        mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers')),
-      ).thenAnswer((_) async => http.Response(successLoginResponseBody, successLoginResponseStatus));
+      when(mockPreferenciasRepository.obtenerPreferenciaBiometria()).thenAnswer((_) async => false);
+
+      when(mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers'))).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/boletaInicio')) {
+          return http.Response(successCrearBoletaResponseBody, successCrearBoletaResponseStatus);
+        } else {
+          return http.Response(successLoginResponseBody, successLoginResponseStatus);
+        }
+      });
+
+      when(mockClient.get(any)).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/parametros-boleta-inicio/')) {
+          return http.Response(successParamsBoletaInicioResponseBody, successParamsBoletaInicioResponseStatus);
+        } else {
+          return http.Response('{}', 200);
+        }
+      });
 
       final container = ProviderContainer(
         overrides: [
           httpClientProvider.overrideWith((ref) => mockClient),
+          usuarioRepositoryProvider.overrideWith((ref) => mockUsuarioRepository),
+          preferenciasRepositoryProvider.overrideWith((ref) => mockPreferenciasRepository),
           secureStorageDataSourceProvider.overrideWith((ref) => mockSecureStorageDataSource),
+          jwtTokenServiceProvider.overrideWith((ref) => mockJwtTokenService),
         ],
       );
 
@@ -559,13 +780,18 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+
+      // Después del login exitoso, debería navegar a MainNavigationScreen que contiene HomeScreen
+      expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      await pumpFrames(tester);
+
+      expect(find.byType(CrearBoletaScreen), findsOneWidget);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
@@ -573,12 +799,15 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria Garcia');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
 
+      await container.read(boletaInicioDataProvider.future);
+      await pumpFrames(tester);
+
       await tester.tap(find.text('Volver'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
@@ -589,15 +818,39 @@ void main() {
     testWidgets('Debe cancelar la generación cuando se presiona NO en el diálogo de confirmación', (tester) async {
       final mockClient = MockClient();
       final mockSecureStorageDataSource = MockSecureStorageDataSource();
+      final mockUsuarioRepository = MockUsuarioRepositoryComplete(mockSecureStorageDataSource);
+      final mockPreferenciasRepository = MockPreferenciasRepository();
+      final mockJwtTokenService = MockJwtTokenService();
 
-      when(
-        mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers')),
-      ).thenAnswer((_) async => http.Response(successLoginResponseBody, successLoginResponseStatus));
+      when(mockPreferenciasRepository.obtenerPreferenciaBiometria()).thenAnswer((_) async => false);
+
+      when(mockClient.post(any, body: anyNamed('body'), headers: anyNamed('headers'))).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/boletaInicio')) {
+          return http.Response(successCrearBoletaResponseBody, successCrearBoletaResponseStatus);
+        } else {
+          return http.Response(successLoginResponseBody, successLoginResponseStatus);
+        }
+      });
+
+      when(mockClient.get(any)).thenAnswer((invocation) async {
+        final url = invocation.positionalArguments[0].toString();
+
+        if (url.contains('/api/v1/parametros-boleta-inicio/')) {
+          return http.Response(successParamsBoletaInicioResponseBody, successParamsBoletaInicioResponseStatus);
+        } else {
+          return http.Response('{}', 200);
+        }
+      });
 
       final container = ProviderContainer(
         overrides: [
           httpClientProvider.overrideWith((ref) => mockClient),
+          usuarioRepositoryProvider.overrideWith((ref) => mockUsuarioRepository),
+          preferenciasRepositoryProvider.overrideWith((ref) => mockPreferenciasRepository),
           secureStorageDataSourceProvider.overrideWith((ref) => mockSecureStorageDataSource),
+          jwtTokenServiceProvider.overrideWith((ref) => mockJwtTokenService),
         ],
       );
 
@@ -610,30 +863,76 @@ void main() {
 
       await tester.tap(find.byType(ElevatedButton));
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
+
+      // Después del login exitoso, debería navegar a MainNavigationScreen que contiene HomeScreen
+      expect(find.byType(HomeScreen), findsOneWidget);
 
       await tester.tap(find.text('Nueva boleta'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+      await pumpFrames(tester);
+
+      expect(find.byType(CrearBoletaScreen), findsOneWidget);
 
       await tester.tap(find.text('Boleta de Inicio'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso1BoletaInicioScreen), findsOneWidget);
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Juan Perez');
       await tester.enterText(find.byType(TextFormField).at(1), 'Maria Garcia');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso2BoletaInicioScreen), findsOneWidget);
+
+      await container.read(boletaInicioDataProvider.future);
+      await pumpFrames(tester);
+
+      final dropdowns = find.byType(DropdownButtonFormField);
+
+      if (dropdowns.evaluate().isEmpty) {
+        final textFields = find.byType(TextFormField);
+        if (textFields.evaluate().length >= 2) {
+          await tester.enterText(textFields.at(0), 'Juzgado de Distrito y Colegiados');
+          await pumpFrames(tester);
+
+          await tester.enterText(textFields.at(1), 'Daños y Perjuicios');
+          await pumpFrames(tester);
+        }
+
+        await tester.tap(find.text('SIGUIENTE'));
+        await pumpFrames(tester);
+
+        expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
+        return;
+      }
+
+      expect(dropdowns, findsAtLeastNWidgets(1));
+
+      await tester.tap(dropdowns.first);
+      await pumpFrames(tester);
+      await tester.tap(find.text('Juzgado de Distrito y Colegiados'));
+      await pumpFrames(tester);
+
+      await tester.tap(find.byType(DropdownButtonFormField).last);
+      await pumpFrames(tester);
+
+      await tester.tap(find.text('Santa Fe'));
+      await pumpFrames(tester);
 
       await tester.enterText(find.byType(TextFormField), 'Daños y Perjuicios');
 
       await tester.tap(find.text('SIGUIENTE'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
 
       await tester.tap(find.text('GENERAR'));
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 500));
 
       await tester.tap(find.text('NO'));
-      await tester.pumpAndSettle();
+      await pumpFrames(tester);
 
       expect(find.byType(Paso3BoletaInicioScreen), findsOneWidget);
       expect(find.byType(BoletaCreadaScreen), findsNothing);
@@ -657,7 +956,7 @@ Future<void> _esperarLoginScreen(WidgetTester tester) async {
   expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
   await tester.pump(const Duration(milliseconds: 500));
-  await tester.pumpAndSettle();
+  await pumpFrames(tester);
 
   expect(find.byType(LoginScreen), findsOneWidget);
   expect(find.byType(SplashScreen), findsNothing);

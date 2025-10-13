@@ -161,6 +161,7 @@ Para ilustrar cómo interactúan las capas, a continuación se describe el flujo
 ### Soporte Offline
 
 El módulo implementa un robusto sistema de caché local que permite:
+
 - Consultar el historial de boletas sin conexión a internet
 - Sincronización automática cuando se recupera la conectividad
 - Indicadores visuales del estado de conectividad y última sincronización
@@ -168,6 +169,7 @@ El módulo implementa un robusto sistema de caché local que permite:
 ### Gestión de Estado Complejo
 
 Utiliza un patrón de estado inmutable con `BoletasState` que incluye:
+
 - Lista de boletas con paginación
 - Estado de carga y errores
 - Metadatos de paginación (página actual, total, siguiente/anterior)
@@ -176,6 +178,7 @@ Utiliza un patrón de estado inmutable con `BoletasState` que incluye:
 ### Validación de Negocio
 
 Implementa validaciones específicas del dominio como:
+
 - Montos mínimos y máximos para boletas
 - Validación de fechas de vencimiento
 - Verificación de estados de boletas (pagada, vencida, pendiente)

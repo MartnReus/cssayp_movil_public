@@ -8,10 +8,14 @@ library;
 
 // Domain Layer
 export 'domain/entities/boleta_entity.dart';
-export 'domain/entities/juicio_entity.dart';
-export 'domain/entities/parametros_boleta_inicio_entity.dart';
-export 'domain/entities/estado_boleta.dart';
 export 'domain/entities/boleta_tipo.dart';
+export 'domain/entities/circunscripcion_entity.dart';
+export 'domain/entities/crear_boleta_inicio_result.dart';
+export 'domain/entities/juicio_entity.dart';
+export 'domain/entities/estado_boleta.dart';
+export 'domain/entities/montos_entity.dart';
+export 'domain/entities/parametros_boleta_inicio_entity.dart';
+export 'domain/entities/tipo_juicio_entity.dart';
 
 export 'domain/repositories/boletas_repository.dart';
 export 'domain/repositories/juicios_repository.dart';

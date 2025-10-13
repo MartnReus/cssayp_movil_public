@@ -1,31 +1,23 @@
-class ParametrosBoletaInicioEntity {
-  final List<String> tiposJuicio;
-  final List<String> circunscripciones;
-  final List<String> competencias;
-  final List<String> tiposCausa;
+import 'package:cssayp_movil/boletas/boletas.dart';
 
-  const ParametrosBoletaInicioEntity({
-    required this.tiposJuicio,
-    required this.circunscripciones,
-    required this.competencias,
-    required this.tiposCausa,
-  });
+class ParametrosBoletaInicioEntity {
+  final List<TipoJuicioEntity> tiposJuicio;
+  final List<CircunscripcionEntity> circunscripciones;
+
+  const ParametrosBoletaInicioEntity({required this.tiposJuicio, required this.circunscripciones});
 
   factory ParametrosBoletaInicioEntity.fromJson(Map<String, dynamic> json) {
     return ParametrosBoletaInicioEntity(
-      tiposJuicio: List<String>.from(json['tipos_juicio'] ?? []),
-      circunscripciones: List<String>.from(json['circunscripciones'] ?? []),
-      competencias: List<String>.from(json['competencias'] ?? []),
-      tiposCausa: List<String>.from(json['tipos_causa'] ?? []),
+      tiposJuicio: (json['tipos_juicios'] as List<dynamic>? ?? [])
+          .map((item) => TipoJuicioEntity.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      circunscripciones: (json['circunscripciones'] as List<dynamic>? ?? [])
+          .map((item) => CircunscripcionEntity.fromJson(item as Map<String, dynamic>))
+          .toList(),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'tipos_juicio': tiposJuicio,
-      'circunscripciones': circunscripciones,
-      'competencias': competencias,
-      'tipos_causa': tiposCausa,
-    };
+    return {'tipos_juicio': tiposJuicio, 'circunscripciones': circunscripciones};
   }
 }

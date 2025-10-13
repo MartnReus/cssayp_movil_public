@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart';
 import 'package:cssayp_movil/config.dart';
 import 'package:http/http.dart' as http;
-import 'package:cssayp_movil/boletas/data/models/crear_boleta_response_models.dart';
-import 'package:cssayp_movil/boletas/data/models/historial_boletas_response_models.dart';
 
 class BoletasDataSource {
   final http.Client client;
@@ -14,19 +13,29 @@ class BoletasDataSource {
   BoletasDataSource({required this.client});
 
   Future<CrearBoletaResponse> crearBoletaInicio({
-    required int nroAfiliado,
+    required String token,
     required String caratula,
-    required double monto,
-    required String digito,
+    required String juzgado,
+    required CircunscripcionEntity circunscripcion,
+    required TipoJuicioEntity tipoJuicio,
   }) async {
     try {
+      final body = {
+        'aporteVoluntario': 'N',
+        'caratula': caratula,
+        'circunscripcion': circunscripcion.toArray(),
+        'juzgado': juzgado,
+        'tipoJuicio': tipoJuicio.toArray(),
+        'tipoPago': 4,
+      };
+
       final response = await client.post(
-        Uri.parse('${AppConfig.consultaApiURL}/api/v1/boletaInicio'),
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-        body: json.encode({'nro_afiliado': nroAfiliado, 'caratula': caratula, 'monto': monto, 'digito': digito}),
+        Uri.parse('${AppConfig.cgaUrl}/ws/bol/inicio-generar'),
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+        body: json.encode(body),
       );
 
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         return CrearBoletaSuccessResponse.fromJson(response.statusCode, json.decode(response.body));
       } else {
         return CrearBoletaGenericErrorResponse.fromJson(response.statusCode, json.decode(response.body));
@@ -135,16 +144,17 @@ class BoletasDataSource {
     }
   }
 
-  /// TODO: implementar cuando haya una API para obtener los parámetros
-  // Future<Map<String, dynamic>> obtenerParametrosBoletaInicio() async {
-  //   final response = await client.get(Uri.parse('${AppConfig.consultaApiURL}/api/v1/parametros-boleta-inicio'));
+  Future<Map<String, dynamic>> obtenerParametrosBoletaInicio(int nroAfiliado) async {
+    final response = await client.get(
+      Uri.parse('${AppConfig.consultaApiURL}/api/v1/parametros-boleta-inicio/$nroAfiliado'),
+    );
 
-  //   if (response.statusCode == 200) {
-  //     return json.decode(response.body);
-  //   } else {
-  //     throw Exception('Error al obtener parámetros de boleta de inicio: ${response.statusCode}');
-  //   }
-  // }
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Error al obtener parámetros de boleta de inicio: ${response.statusCode}');
+    }
+  }
 
   Future<PaginatedResponseModel> buscarBoletasInicioPagadas({
     required int nroAfiliado,

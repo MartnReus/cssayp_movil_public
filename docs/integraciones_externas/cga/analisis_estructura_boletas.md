@@ -1,9 +1,11 @@
 # Documentación Tabla CD_BOLETA_GENERADA
 
 ## Descripción General
+
 Tabla principal que almacena las boletas generadas en el sistema CGA (Consulta y Gestión de Afiliados) de la Caja de Seguridad Social de Abogados y Procuradores de Santa Fe.
 
 ## Esquema
+
 **Schema**: `CJ_CGA`  
 **Nombre**: `CD_BOLETA_GENERADA`
 
@@ -77,10 +79,12 @@ Tabla principal que almacena las boletas generadas en el sistema CGA (Consulta y
 ## Restricciones y Claves
 
 ### Clave Primaria
+
 - **Constraint**: `UK_BOLETA_GENERADA`
 - **Columnas**: `SISTEMA`, `ID_BOLETA_GENERADA`
 
 ### Claves Foráneas
+
 - **FK_BOLETAGEN_TIPOBOLETA**: `ID_TIPO_BOLETA` → `CD_TIPO_BOLETA.ID_TIPO_BOLETA`
 
 ## Índices
@@ -97,10 +101,12 @@ Tabla principal que almacena las boletas generadas en el sistema CGA (Consulta y
 ## Relación entre Boletas de Inicio y Fin
 
 ### Lógica de Asociación
+
 - **Boleta de Inicio**: `ID_BOLETA_ASOCIADA` = `NULL`
 - **Boleta de Fin**: `ID_BOLETA_ASOCIADA` = `ID_BOLETA_GENERADA` de la boleta de inicio
 
 ### Ejemplo de Relación
+
 ```sql
 -- Boleta de Inicio
 ID_BOLETA_GENERADA: 123
@@ -118,23 +124,27 @@ CARATULA: "Pérez Juan C/ González Raúl S/ Cuota alimentaria"
 ## Campos Relevantes para el Proyecto
 
 ### Para Identificación de Juicios
+
 - `CARATULA`: Descripción del expediente
 - `ID_BOLETA_ASOCIADA`: Vinculación entre inicio y fin
 - `ID_TIPO_BOLETA`: Diferencia inicio de fin
 
 ### Para Gestión de Pagos
+
 - `FECHA_PAGO`: Estado de pago
 - `IMPORTE_PAGO`: Monto pagado
 - `ID_TIPO_PAGO`: Método de pago
 - `ID_ESTADO_BOLETA`: Estado actual
 
 ### Para Identificación del Usuario
+
 - `NRO_AFILIADO`: Identificador del profesional
 - `MATRICULA`: Matrícula profesional
 
 ## Consultas Útiles
 
 ### Obtener juicios de un afiliado
+
 ```sql
 SELECT 
     COALESCE(b_inicio.ID_BOLETA_GENERADA, b_fin.ID_BOLETA_ASOCIADA) as id_juicio,
@@ -151,6 +161,7 @@ WHERE b_inicio.NRO_AFILIADO = :nro_afiliado
 ```
 
 ### Validar que existe boleta de inicio para crear fin
+
 ```sql
 SELECT COUNT(*) as es_valida
 FROM CD_BOLETA_GENERADA 
