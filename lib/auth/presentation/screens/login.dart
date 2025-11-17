@@ -3,7 +3,6 @@ import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/shared/enums/auth_status.dart';
 import 'package:cssayp_movil/shared/exceptions/auth_exceptions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class LoginScreenArguments {
@@ -97,88 +96,79 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final screenSize = MediaQuery.of(context).size;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        systemNavigationBarColor: Theme.of(context).colorScheme.surface,
-        systemNavigationBarIconBrightness: Brightness.dark,
+    return Scaffold(
+      // return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onTertiary,
+        elevation: 0,
+        title: const Text('Inicio de sesión'),
       ),
-      child: Scaffold(
-        // return Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onTertiary,
-          elevation: 0,
-          title: const Text('Inicio de sesión'),
-        ),
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight:
-                      screenSize.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Logo de la Caja
-                      Container(
-                        width: screenSize.width * 0.6, // 60% of screen width
-                        height: screenSize.width * 0.6, // Keep it square
-                        constraints: const BoxConstraints(maxWidth: 240, maxHeight: 240),
-                        decoration: ShapeDecoration(
-                          image: const DecorationImage(
-                            image: AssetImage("assets/images/LogoCaja.png"),
-                            fit: BoxFit.cover,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(width: 3, color: Theme.of(context).colorScheme.surfaceContainerHigh),
-                          ),
-                          shadows: [
-                            BoxShadow(
-                              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 0),
-                              spreadRadius: 0,
-                            ),
-                          ],
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight:
+                    screenSize.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Logo de la Caja
+                    Container(
+                      width: screenSize.width * 0.6, // 60% of screen width
+                      height: screenSize.width * 0.6, // Keep it square
+                      constraints: const BoxConstraints(maxWidth: 240, maxHeight: 240),
+                      decoration: ShapeDecoration(
+                        image: const DecorationImage(
+                          image: AssetImage("assets/images/logo_caja.png"),
+                          fit: BoxFit.cover,
                         ),
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(width: 3, color: Theme.of(context).colorScheme.surfaceContainerHigh),
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+                            blurRadius: 20,
+                            offset: const Offset(0, 0),
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+
+                    // Formulario de login
+                    if (!showBiometricLoginSection)
+                      LoginForm(
+                        usernameController: usernameController,
+                        passwordController: passwordController,
+                        showBiometricButton: showBiometricButton,
+                        onBiometricTap: () {
+                          setState(() {
+                            showBiometricLoginSection = true;
+                          });
+                          _checkBiometric();
+                        },
                       ),
 
-                      const SizedBox(height: 40),
-
-                      // Formulario de login
-                      if (!showBiometricLoginSection)
-                        LoginForm(
-                          usernameController: usernameController,
-                          passwordController: passwordController,
-                          showBiometricButton: showBiometricButton,
-                          onBiometricTap: () {
-                            setState(() {
-                              showBiometricLoginSection = true;
-                            });
-                            _checkBiometric();
-                          },
-                        ),
-
-                      // Seccion de biometria
-                      if (showBiometricButton && showBiometricLoginSection)
-                        LoginBiometric(
-                          onUseCredentials: () {
-                            setState(() {
-                              showBiometricLoginSection = false;
-                            });
-                          },
-                        ),
-                    ],
-                  ),
+                    // Seccion de biometria
+                    if (showBiometricButton && showBiometricLoginSection)
+                      LoginBiometric(
+                        onUseCredentials: () {
+                          setState(() {
+                            showBiometricLoginSection = false;
+                          });
+                        },
+                      ),
+                  ],
                 ),
               ),
             ),

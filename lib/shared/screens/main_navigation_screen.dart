@@ -1,9 +1,15 @@
 import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/comprobantes/comprobantes.dart';
+import 'package:cssayp_movil/notificaciones/notificaciones.dart';
 import 'package:cssayp_movil/pagos/presentation/screens/pagos_principal_screen.dart';
+import 'package:cssayp_movil/pagos/presentation/screens/procesar_pago_screen.dart';
 import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
+import 'package:cssayp_movil/shared/screens/mas_screen.dart';
 import 'package:cssayp_movil/shared/screens/proximamente_screen.dart';
+import 'package:cssayp_movil/shared/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class MainNavigationScreen extends ConsumerStatefulWidget {
@@ -17,6 +23,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(navigationProvider).index;
+    final currentRouteName = ref.watch(navigationProvider).routeName;
 
     return PopScope(
       canPop: false,
@@ -24,18 +31,27 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
         if (didPop) return;
 
         final navigator = ref.watch(navigationProvider).navigatorState;
-        if (navigator == null) return;
+        if (navigator == null) {
+          SystemNavigator.pop();
+          return;
+        }
 
         if (navigator.canPop()) {
-          navigator.pop();
-        } else {
-          // Si no hay más rutas en el stack actual, volver al home
-          if (currentIndex > 0) {
-            ref.read(navigationProvider.notifier).selectTab(0);
-          } else {
-            // Si ya estamos en el home, cerrar la aplicación
-            Navigator.of(context).pop();
+          if (currentRouteName != null && currentRouteName != '/') {
+            navigator.pop();
           }
+
+          if (currentRouteName == '/' && currentIndex > 0) {
+            ref.read(navigationProvider.notifier).selectTab(0);
+          }
+
+          if (currentRouteName == '/' && currentIndex == 0) {
+            // Si ya estamos en el home y en la ruta inicial, cerrar la aplicación
+            SystemNavigator.pop();
+          }
+        } else {
+          // Si ya estamos en el home y en la ruta inicial, cerrar la aplicación
+          SystemNavigator.pop();
         }
       },
       child: Scaffold(
@@ -61,14 +77,14 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                 label: 'Inicio',
               ),
               NavigationDestination(
+                icon: Icon(Icons.work_outline, color: Theme.of(context).colorScheme.secondary),
+                selectedIcon: Icon(Icons.work),
+                label: 'Vida Activa',
+              ),
+              NavigationDestination(
                 icon: Icon(Icons.balance_outlined, color: Theme.of(context).colorScheme.secondary),
                 selectedIcon: Icon(Icons.balance),
                 label: 'Boletas',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.payment_outlined, color: Theme.of(context).colorScheme.secondary),
-                selectedIcon: Icon(Icons.payment),
-                label: 'Pagos',
               ),
               NavigationDestination(
                 icon: Icon(Icons.density_medium_outlined, color: Theme.of(context).colorScheme.secondary),
@@ -87,27 +103,28 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     return Navigator(
       key: navigationKeys[index],
       onGenerateRoute: (RouteSettings settings) {
-        return MaterialPageRoute(builder: (context) => _buildRouteForTab(index, settings));
+        return PageRouteBuilder(
+          settings: settings,
+          pageBuilder: (context, animation, secondaryAnimation) => _buildRouteForTab(index, settings),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        );
       },
     );
   }
 
   Widget _buildRouteForTab(int index, RouteSettings settings) {
-    final int currentIndex = ref.read(navigationProvider).index;
-    if (currentIndex != index) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF173664))),
-      );
-    }
-
     switch (index) {
-      case 0: // Home
+      case 0: // Inicio
         switch (settings.name) {
+          case '/notificaciones':
+            return const NotificacionesScreen();
           default:
             return const HomeScreen();
         }
-      case 1: // Historial Boletas
+      case 1: // Vida Activa
+        return const ProximamenteScreen();
+      case 2: // Boletas
         switch (settings.name) {
           case '/crear-boleta':
             return const CrearBoletaScreen();
@@ -126,19 +143,39 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
             return const Paso2BoletaFinScreen();
           case '/boleta-fin-paso3':
             return const Paso3BoletaFinScreen();
+          case '/ver-comprobante-inicio':
+            final args = settings.arguments as ComprobanteEntity?;
+            if (args == null) {
+              return const HistorialScreen();
+            }
+            return ComprobanteInicioScreen(comprobante: args);
+          case '/ver-comprobante-fin':
+            final args = settings.arguments as ComprobanteEntity?;
+            if (args == null) {
+              return const HistorialScreen();
+            }
+            return ComprobanteFinScreen(comprobante: args);
           default:
             return const HistorialScreen();
         }
-      case 2: // Pagos
-        switch (settings.name) {
-          case '/procesar-pago':
-            // Aquí se pasaría la lista de boletas seleccionadas
-            return const PagosPrincipalScreen();
-          default:
-            return const PagosPrincipalScreen();
-        }
       case 3: // Más
-        return const ProximamenteScreen();
+        switch (settings.name) {
+          case '/pagos':
+            return const PagosPrincipalScreen();
+          case '/procesar-pago':
+            final boletas = settings.arguments as List<BoletaEntity>?;
+            if (boletas != null) {
+              return ProcesarPagoScreen(boletas: boletas);
+            }
+            return const PagosPrincipalScreen();
+          case '/settings':
+            return const SettingsScreen();
+          default:
+            if (settings.name != '/') {
+              return ProximamenteScreen();
+            }
+            return MasScreen();
+        }
       default:
         return const HomeScreen();
     }

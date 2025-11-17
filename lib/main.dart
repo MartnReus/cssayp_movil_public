@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
 import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/shared/screens/main_navigation_screen.dart';
@@ -21,6 +24,11 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
+
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }

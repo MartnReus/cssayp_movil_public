@@ -122,14 +122,20 @@ class UsuarioRepositoryImpl implements UsuarioRepository {
 
       DatosUsuarioEntity? datosUsuario;
       // Recuperar los datos del usuario desde SharedPreferences
+      final datosUsuarioNaf = await preferenciasDataSource.obtenerValor('datos_usuario_naf');
       final datosUsuarioJson = await preferenciasDataSource.obtenerValor('datos_usuario');
-      if (datosUsuarioJson == null || datosUsuarioJson.isEmpty) {
+
+      final bool isNuevoNaf = datosUsuarioNaf == null || datosUsuarioNaf != usuario.nroAfiliado.toString();
+      final bool sinDatosUsuario = datosUsuarioJson == null || datosUsuarioJson.isEmpty;
+
+      if (isNuevoNaf || sinDatosUsuario) {
         // Si no hay datos del usuario, obtenerlos desde la API
         final datosResponse = await usuarioDataSource.obtenerDatosUsuario(token);
         if (datosResponse is DatosUsuarioSuccessResponse) {
           // Guardar los datos del usuario en SharedPreferences
           datosUsuario = DatosUsuarioEntity.fromJson(datosResponse.toJson());
           await preferenciasDataSource.guardarValor('datos_usuario', json.encode(datosUsuario));
+          await preferenciasDataSource.guardarValor('datos_usuario_naf', usuario.nroAfiliado.toString());
         }
       } else {
         datosUsuario = DatosUsuarioEntity.fromJson(json.decode(datosUsuarioJson));

@@ -1,3 +1,4 @@
+import 'package:cssayp_movil/comprobantes/comprobantes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
@@ -17,7 +18,8 @@ class HistorialBoletasWidget extends ConsumerStatefulWidget {
 class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget> {
   final TextEditingController _buscarController = TextEditingController();
 
-  String _ordenActual = 'Fecha';
+  // String _ordenActual = 'Fecha';
+  String _filtroEstado = 'todas';
 
   @override
   void initState() {
@@ -53,18 +55,7 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
       estado = EstadoBoleta.pendiente;
     }
 
-    String tipo;
-    switch (entity.tipo) {
-      case BoletaTipo.inicio:
-        tipo = 'Inicio';
-        break;
-      case BoletaTipo.finalizacion:
-        tipo = 'Fin';
-        break;
-      case BoletaTipo.desconocido:
-        tipo = 'Desconocido';
-        break;
-    }
+    String tipo = entity.tipo.displayName;
 
     return BoletaHistorial(
       id: entity.id,
@@ -82,16 +73,6 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('dd/MM/yyyy', 'es_AR');
     final moneyFmt = NumberFormat.currency(locale: 'es_AR', symbol: '\$');
-
-    final currentTabIndex = ref.watch(navigationProvider).index;
-    final isHistorialTabVisible = currentTabIndex == 1;
-
-    if (!isHistorialTabVisible) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFEEF9FF),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF173664))),
-      );
-    }
 
     final boletasAsyncValue = ref.watch(boletasProvider);
 
@@ -165,11 +146,67 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                       const SizedBox(height: 8),
 
                       // Ordenar por
+                      // Column(
+                      //   crossAxisAlignment: CrossAxisAlignment.start,
+                      //   children: [
+                      //     const Text(
+                      //       'Ordenar por',
+                      //       style: TextStyle(
+                      //         color: Color(0xFF173664),
+                      //         fontSize: 12,
+                      //         fontFamily: 'Inter',
+                      //         fontWeight: FontWeight.w400,
+                      //         height: 1.40,
+                      //       ),
+                      //     ),
+                      //     const SizedBox(height: 4),
+                      //     DropdownButtonHideUnderline(
+                      //       child: DropdownButton2<String>(
+                      //         isExpanded: true,
+                      //         items: const [
+                      //           DropdownMenuItem(value: 'Fecha', child: Text('Fecha de creación')),
+                      //           DropdownMenuItem(value: 'Carátula', child: Text('Carátula')),
+                      //           DropdownMenuItem(value: 'Tipo', child: Text('Tipo de boleta')),
+                      //           DropdownMenuItem(value: 'Estado', child: Text('Estado de pago')),
+                      //         ],
+                      //         value: _ordenActual,
+                      //         onChanged: (value) {
+                      //           if (value == null) return;
+                      //           setState(() {
+                      //             _ordenActual = value;
+                      //             // El ordenamiento ahora es solo local, no necesitamos resetear paginación
+                      //           });
+                      //         },
+                      //         buttonStyleData: ButtonStyleData(
+                      //           height: 40,
+                      //           padding: const EdgeInsets.symmetric(horizontal: 12),
+                      //           decoration: BoxDecoration(
+                      //             color: Colors.white,
+                      //             borderRadius: BorderRadius.circular(8),
+                      //             border: Border.all(color: const Color(0xFF194B8F), width: 1),
+                      //           ),
+                      //         ),
+                      //         iconStyleData: const IconStyleData(icon: Icon(Icons.keyboard_arrow_down)),
+                      //         dropdownStyleData: DropdownStyleData(
+                      //           maxHeight: 260,
+                      //           decoration: BoxDecoration(
+                      //             color: Colors.white,
+                      //             borderRadius: BorderRadius.circular(8),
+                      //             border: Border.all(color: const Color(0xFF194B8F), width: 1),
+                      //           ),
+                      //         ),
+                      //         menuItemStyleData: const MenuItemStyleData(height: 40),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+
+                      // Filtro por estado
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Ordenar por',
+                            'Estado',
                             style: TextStyle(
                               color: Color(0xFF173664),
                               fontSize: 12,
@@ -183,17 +220,18 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                             child: DropdownButton2<String>(
                               isExpanded: true,
                               items: const [
-                                DropdownMenuItem(value: 'Fecha', child: Text('Fecha de creación')),
-                                DropdownMenuItem(value: 'Carátula', child: Text('Carátula')),
-                                DropdownMenuItem(value: 'Tipo', child: Text('Tipo de boleta')),
-                                DropdownMenuItem(value: 'Estado', child: Text('Estado de pago')),
+                                DropdownMenuItem(value: 'todas', child: Text('Todas')),
+                                DropdownMenuItem(value: 'pagadas', child: Text('Pagadas')),
+                                DropdownMenuItem(value: 'no_pagadas', child: Text('No Pagadas')),
                               ],
-                              value: _ordenActual,
+                              value: _filtroEstado,
                               onChanged: (value) {
                                 if (value == null) return;
                                 setState(() {
-                                  _ordenActual = value;
-                                  // El ordenamiento ahora es solo local, no necesitamos resetear paginación
+                                  _filtroEstado = value;
+                                  ref
+                                      .read(boletasProvider.notifier)
+                                      .obtenerBoletasCreadas(page: 1, filtroEstado: _filtroEstado);
                                 });
                               },
                               buttonStyleData: ButtonStyleData(
@@ -291,7 +329,7 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                               _accion(
                                 icon: Icons.payments_outlined,
                                 label: 'Pagar',
-                                isActive: b.estado == EstadoBoleta.pendiente, // Solo activo si está pendiente
+                                isActive: b.estado == EstadoBoleta.pendiente,
                                 onTap: b.estado == EstadoBoleta.pendiente
                                     ? () {
                                         _navegarAPago(b);
@@ -302,13 +340,10 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                               _accion(
                                 icon: Icons.visibility_outlined,
                                 label: 'Ver comprobante',
-                                isActive: b.estado == EstadoBoleta.pagada, // Solo activo si está pagada
+                                isActive: b.estado == EstadoBoleta.pagada,
                                 onTap: b.estado == EstadoBoleta.pagada
                                     ? () {
-                                        // TODO: implementar ver comprobante
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(const SnackBar(content: Text('Mostrando comprobante...')));
+                                        _navegarAVerComprobante(b);
                                       }
                                     : () {},
                               ),
@@ -328,7 +363,12 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                       Expanded(
                         child: ElevatedButton(
                           onPressed: boletasState.hasPreviousPage
-                              ? () => ref.read(boletasProvider.notifier).irAPaginaAnterior()
+                              ? () => ref
+                                    .read(boletasProvider.notifier)
+                                    .obtenerBoletasCreadas(
+                                      page: boletasState.currentPage - 1,
+                                      filtroEstado: _filtroEstado,
+                                    )
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF194B8F),
@@ -373,7 +413,12 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
                       Expanded(
                         child: ElevatedButton(
                           onPressed: boletasState.hasNextPage
-                              ? () => ref.read(boletasProvider.notifier).irAPaginaSiguiente()
+                              ? () => ref
+                                    .read(boletasProvider.notifier)
+                                    .obtenerBoletasCreadas(
+                                      page: boletasState.currentPage + 1,
+                                      filtroEstado: _filtroEstado,
+                                    )
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF173664),
@@ -538,6 +583,30 @@ class _HistorialBoletasWidgetState extends ConsumerState<HistorialBoletasWidget>
     final boletaEntity = boletas.firstWhere((boleta) => boleta.id == boletaHistorial.id);
 
     Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProcesarPagoScreen(boletas: [boletaEntity])));
+  }
+
+  void _navegarAVerComprobante(BoletaHistorial boletaHistorial) async {
+    final boletasState = ref.read(boletasProvider);
+    final boletas = boletasState.value?.boletas;
+
+    if (boletas == null || boletas.isEmpty) {
+      return;
+    }
+
+    final boletaEntity = boletas.firstWhere((boleta) => boleta.id == boletaHistorial.id);
+
+    final navigator = ref.read(navigationProvider).navigatorState;
+    await ref.read(comprobantesProvider.notifier).obtenerComprobante(boletaEntity.id);
+    final comprobante = ref.read(comprobantesProvider).value?.comprobante;
+    final primeraBoleta = comprobante?.boletasPagadas.isNotEmpty == true ? comprobante!.boletasPagadas.first : null;
+
+    if (navigator != null && comprobante != null) {
+      if (primeraBoleta!.mvc == '0100') {
+        navigator.pushNamed("/ver-comprobante-inicio", arguments: comprobante);
+      } else {
+        navigator.pushNamed("/ver-comprobante-fin", arguments: comprobante);
+      }
+    }
   }
 
   Widget _accion({required IconData icon, required String label, required VoidCallback onTap, bool isActive = true}) {

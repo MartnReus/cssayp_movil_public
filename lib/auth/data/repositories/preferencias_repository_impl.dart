@@ -4,9 +4,8 @@ import 'package:cssayp_movil/auth/domain/repositories/preferencias_repository.da
 class PreferenciasRepositoryImpl implements PreferenciasRepository {
   final PreferenciasDataSource _preferenciasDataSource;
 
-  PreferenciasRepositoryImpl({
-    required PreferenciasDataSource preferenciasDataSource,
-  }) : _preferenciasDataSource = preferenciasDataSource;
+  PreferenciasRepositoryImpl({required PreferenciasDataSource preferenciasDataSource})
+    : _preferenciasDataSource = preferenciasDataSource;
 
   @override
   Future<void> guardarPreferenciaBiometria(bool valor) async {

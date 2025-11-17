@@ -8,7 +8,6 @@ import 'package:test/test.dart';
 import 'biometric_auth_service_test.mocks.dart';
 
 const _reason = 'La aplicación necesita verificar su identidad';
-const _options = AuthenticationOptions(stickyAuth: true, biometricOnly: false);
 
 @GenerateNiceMocks([MockSpec<LocalAuthentication>()])
 void main() {
@@ -48,15 +47,11 @@ void main() {
     });
 
     void stubAuthenticate(bool returnValue) {
-      when(
-        mockLocalAuth.authenticate(localizedReason: _reason, options: _options),
-      ).thenAnswer((_) async => returnValue);
+      when(mockLocalAuth.authenticate(localizedReason: _reason)).thenAnswer((_) async => returnValue);
     }
 
     Future<void> stubAuthenticateThrows(String code) async {
-      when(
-        mockLocalAuth.authenticate(localizedReason: _reason, options: _options),
-      ).thenThrow(PlatformException(code: code));
+      when(mockLocalAuth.authenticate(localizedReason: _reason)).thenThrow(PlatformException(code: code));
     }
 
     test('debe retornar success cuando authenticate devuelve true', () async {
@@ -64,7 +59,7 @@ void main() {
 
       final result = await biometricAuthService.autenticar();
       expect(result, equals(BiometricAuthResult.success));
-      verify(mockLocalAuth.authenticate(localizedReason: _reason, options: _options)).called(1);
+      verify(mockLocalAuth.authenticate(localizedReason: _reason)).called(1);
     });
 
     test('debe retornar failure cuando authenticate devuelve false', () async {
@@ -118,7 +113,7 @@ void main() {
     });
 
     test('debe retornar unknownError para cualquier otra excepcion', () async {
-      when(mockLocalAuth.authenticate(localizedReason: _reason, options: _options)).thenThrow(Exception('unexpected'));
+      when(mockLocalAuth.authenticate(localizedReason: _reason)).thenThrow(Exception('unexpected'));
 
       final result = await biometricAuthService.autenticar();
       expect(result, equals(BiometricAuthResult.unknownError));

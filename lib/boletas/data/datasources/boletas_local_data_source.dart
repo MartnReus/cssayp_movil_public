@@ -13,7 +13,7 @@ class BoletasLocalDataSource {
 
     await db.transaction((txn) async {
       for (final boleta in boletas) {
-        await txn.insert('boletas_historial', boletaToMap(boleta), conflictAlgorithm: ConflictAlgorithm.replace);
+        await txn.insert('boletas_generadas', boletaToMap(boleta), conflictAlgorithm: ConflictAlgorithm.replace);
       }
     });
   }
@@ -38,7 +38,7 @@ class BoletasLocalDataSource {
     }
 
     final result = await db.rawQuery('''
-      SELECT * FROM boletas_historial 
+      SELECT * FROM boletas_generadas
       $whereClause 
       ORDER BY fecha_impresion DESC 
       $limitClause
@@ -59,7 +59,7 @@ class BoletasLocalDataSource {
     }
 
     final result = await db.rawQuery('''
-      SELECT COUNT(*) as count FROM boletas_historial $whereClause
+      SELECT COUNT(*) as count FROM boletas_generadas $whereClause
     ''', whereArgs);
 
     return Sqflite.firstIntValue(result) ?? 0;
@@ -67,14 +67,14 @@ class BoletasLocalDataSource {
 
   Future<void> limpiarCache() async {
     final db = await _databaseHelper.database;
-    await db.delete('boletas_historial');
+    await db.delete('boletas_generadas');
   }
 
   Future<DateTime?> obtenerUltimaSincronizacion() async {
     final db = await _databaseHelper.database;
 
     final result = await db.rawQuery('''
-      SELECT MAX(fecha_sync) as ultima_sync FROM boletas_historial
+      SELECT MAX(fecha_sync) as ultima_sync FROM boletas_generadas
     ''');
 
     final ultimaSync = result.isNotEmpty ? result.first['ultima_sync'] as String? : null;
@@ -92,7 +92,7 @@ class BoletasLocalDataSource {
   Map<String, dynamic> boletaToMap(BoletaEntity boleta) {
     return {
       'id': boleta.id,
-      'tipo': boleta.tipo.toString().split('.').last,
+      'tipo': boleta.tipo.codigo,
       'monto': boleta.monto,
       'fecha_impresion': boleta.fechaImpresion.toIso8601String(),
       'fecha_vencimiento': boleta.fechaVencimiento.toIso8601String(),
@@ -113,7 +113,7 @@ class BoletasLocalDataSource {
   BoletaEntity mapToBoleta(Map<String, dynamic> map) {
     return BoletaEntity(
       id: map['id'] as int,
-      tipo: stringToBoletaTipo(map['tipo'] as String),
+      tipo: BoletaTipo.fromCodigo(map['tipo'] as String),
       monto: map['monto'] as double,
       fechaImpresion: DateTime.parse(map['fecha_impresion'] as String),
       fechaVencimiento: DateTime.parse(map['fecha_vencimiento'] as String),
@@ -127,16 +127,5 @@ class BoletasLocalDataSource {
       cuij: map['cuij'] as int?,
       gastosAdministrativos: map['gastos_administrativos'] as double?,
     );
-  }
-
-  BoletaTipo stringToBoletaTipo(String tipo) {
-    switch (tipo) {
-      case 'inicio':
-        return BoletaTipo.inicio;
-      case 'finalizacion':
-        return BoletaTipo.finalizacion;
-      default:
-        return BoletaTipo.desconocido;
-    }
   }
 }

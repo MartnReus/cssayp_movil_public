@@ -35,7 +35,11 @@ class NavigationNotifier extends Notifier<NavigationState> {
   ];
 
   @override
-  NavigationState build() => NavigationState(index: 0, navigationKeys: navigationKeys);
+  NavigationState build() {
+    state = NavigationState(index: 0, navigationKeys: navigationKeys, navigatorState: navigationKeys[0].currentState);
+    selectTab(0);
+    return state;
+  }
 
   void selectTab(int index, {String? routeName, bool? removeAllRoutes = false}) {
     if (index < 0 || index >= navigationKeys.length) return;

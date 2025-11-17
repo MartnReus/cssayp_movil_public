@@ -154,13 +154,13 @@ class MockBoletasRepository extends _i1.Mock implements _i2.BoletasRepository {
   _i4.Future<_i2.HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
     int? nroAfiliado, {
     int? page,
-    int? mostrarPagadas = 1,
+    String? filtroEstado = 'todas',
   }) =>
       (super.noSuchMethod(
             Invocation.method(
               #obtenerHistorialBoletas,
               [nroAfiliado],
-              {#page: page, #mostrarPagadas: mostrarPagadas},
+              {#page: page, #filtroEstado: filtroEstado},
             ),
             returnValue: _i4.Future<_i2.HistorialBoletasSuccessResponse>.value(
               _FakeHistorialBoletasSuccessResponse_2(
@@ -168,7 +168,7 @@ class MockBoletasRepository extends _i1.Mock implements _i2.BoletasRepository {
                 Invocation.method(
                   #obtenerHistorialBoletas,
                   [nroAfiliado],
-                  {#page: page, #mostrarPagadas: mostrarPagadas},
+                  {#page: page, #filtroEstado: filtroEstado},
                 ),
               ),
             ),

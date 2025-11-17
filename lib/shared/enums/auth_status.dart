@@ -1,5 +1,1 @@
-enum AuthStatus {
-  noAutenticado,
-  autenticadoNoRequiereBiometria,
-  autenticadoRequiereBiometria,
-}
+enum AuthStatus { noAutenticado, autenticadoNoRequiereBiometria, autenticadoRequiereBiometria }

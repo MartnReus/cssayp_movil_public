@@ -9,7 +9,7 @@ class ObtenerHistorialBoletasUseCase {
 
   ObtenerHistorialBoletasUseCase({required this.boletasRepository, required this.usuarioRepository});
 
-  Future<HistorialBoletasSuccessResponse> execute({int? page, int mostrarPagadas = 1}) async {
+  Future<HistorialBoletasSuccessResponse> execute({int? page, String filtroEstado = 'todas'}) async {
     // Validar autenticación
     final usuario = await usuarioRepository.obtenerUsuarioActual();
     if (usuario == null) {
@@ -20,7 +20,7 @@ class ObtenerHistorialBoletasUseCase {
     final response = await boletasRepository.obtenerHistorialBoletas(
       usuario.nroAfiliado,
       page: page,
-      mostrarPagadas: mostrarPagadas,
+      filtroEstado: filtroEstado,
     );
 
     return response;

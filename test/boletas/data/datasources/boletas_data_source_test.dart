@@ -606,7 +606,7 @@ void main() {
         final result = await boletasDataSource.obtenerHistorialBoletas(
           nroAfiliado: nroAfiliado,
           page: 1,
-          mostrarPagadas: 1,
+          filtroEstado: 'todas',
         );
 
         expect(result, isA<HistorialBoletasSuccessResponse>());
@@ -638,7 +638,7 @@ void main() {
 
         when(mockClient.get(any)).thenAnswer((_) async => http.Response(errorResponseBody, errorResponseStatus));
 
-        final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, mostrarPagadas: 1);
+        final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, filtroEstado: 'todas');
 
         expect(result, isA<HistorialBoletasErrorResponse>());
         expect((result as HistorialBoletasErrorResponse).statusCode, equals(400));
@@ -658,7 +658,7 @@ void main() {
 
         when(mockClient.get(any)).thenThrow(TimeoutException('Connection timeout'));
 
-        final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, mostrarPagadas: 1);
+        final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, filtroEstado: 'todas');
 
         expect(result, isA<HistorialBoletasErrorResponse>());
         expect((result as HistorialBoletasErrorResponse).statusCode, equals(0));
@@ -676,7 +676,7 @@ void main() {
 
       when(mockClient.get(any)).thenThrow(FormatException('Invalid JSON'));
 
-      final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, mostrarPagadas: 1);
+      final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, filtroEstado: 'todas');
 
       expect(result, isA<HistorialBoletasErrorResponse>());
       expect((result as HistorialBoletasErrorResponse).statusCode, equals(500));
@@ -695,7 +695,7 @@ void main() {
 
         when(mockClient.get(any)).thenThrow(Exception('Unexpected error'));
 
-        final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, mostrarPagadas: 1);
+        final result = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, filtroEstado: 'todas');
 
         expect(result, isA<HistorialBoletasErrorResponse>());
         expect((result as HistorialBoletasErrorResponse).statusCode, equals(0));
@@ -908,7 +908,7 @@ void main() {
       final result = await boletasDataSource.obtenerHistorialBoletas(
         nroAfiliado: nroAfiliado,
         page: 2,
-        mostrarPagadas: 0,
+        filtroEstado: 'no_pagadas',
       );
 
       expect(result, isA<HistorialBoletasSuccessResponse>());

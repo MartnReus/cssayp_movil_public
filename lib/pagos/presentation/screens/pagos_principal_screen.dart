@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/pagos/pagos.dart';
-import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 
 class PagosPrincipalScreen extends ConsumerStatefulWidget {
   const PagosPrincipalScreen({super.key});
@@ -16,7 +15,6 @@ class _PagosPrincipalScreenState extends ConsumerState<PagosPrincipalScreen> wit
   late TabController _tabController;
   // Lista de boletas seleccionadas para pagar
   final Set<int> _boletasSeleccionadas = <int>{};
-  bool _hasLoadedBoletasParaPagar = false;
 
   // Getter para obtener boletas de inicio
   List<BoletaEntity> get _boletasInicio {
@@ -54,32 +52,6 @@ class _PagosPrincipalScreenState extends ConsumerState<PagosPrincipalScreen> wit
 
   @override
   Widget build(BuildContext context) {
-    final currentTabIndex = ref.watch(navigationProvider).index;
-    final isPagosTabVisible = currentTabIndex == 2;
-
-    // Cargar boletas sin incluir las pagadas cuando se muestra la pantalla de pagos
-    // Use WidgetsBinding to avoid calling async operations during build
-    // Use flag to prevent multiple calls
-    ref.listen<NavigationState>(navigationProvider, (previous, next) {
-      if (previous?.index != 2 && next.index == 2 && !_hasLoadedBoletasParaPagar) {
-        _hasLoadedBoletasParaPagar = true;
-        // Se navegó a la pantalla de pagos
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(boletasProvider.notifier).obtenerBoletasParaPagar(page: 1);
-        });
-      } else if (next.index != 2) {
-        // Reset flag when navigating away from payments tab
-        _hasLoadedBoletasParaPagar = false;
-      }
-    });
-
-    if (!isPagosTabVisible) {
-      return const Scaffold(
-        backgroundColor: Color(0xFFEEF9FF),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF173664))),
-      );
-    }
-
     final boletasPendientes = ref.watch(boletasProvider);
 
     return Scaffold(

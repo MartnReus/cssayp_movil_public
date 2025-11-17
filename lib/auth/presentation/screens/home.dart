@@ -1,7 +1,6 @@
 import 'package:cssayp_movil/auth/presentation/providers/auth_provider.dart';
 import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -12,84 +11,65 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool utilizarBiometriaLogin = false;
-
-  @override
-  void initState() {
-    super.initState();
-    ref.read(authProvider.notifier).getBiometriaHabilitada().then((value) {
-      setState(() {
-        utilizarBiometriaLogin = value;
-      });
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final screenSize = MediaQuery.of(context).size;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xFFE6E1D3),
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-          title: Row(
-            children: [
-              Icon(Icons.density_medium, color: Theme.of(context).colorScheme.onPrimary),
-              const SizedBox(width: 8),
-              Text(
-                'CSSAyP Móvil',
-                style: TextStyle(fontSize: 18, fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                _showLogoutDialog(context, ref);
-              },
-              icon: const Icon(Icons.logout),
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 0,
+        leading: Icon(Icons.density_medium, color: Theme.of(context).colorScheme.onPrimary),
+        title: Row(
+          children: [
+            Text(
+              'CSSAyP Móvil',
+              style: TextStyle(fontSize: 18, fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
             ),
           ],
         ),
-        body: SafeArea(
-          child: authState.when(
-            data: (authState) => _buildHomeContent(context, authState, screenSize),
-            loading: () => const Center(
-              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4D4D4D))),
-            ),
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Color(0xFF4D4D4D)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error al cargar información',
-                    style: TextStyle(fontSize: 16, fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(navigationProvider.notifier).selectTab(0, routeName: '/notificaciones');
+            },
+            icon: const Icon(Icons.notifications),
+          ),
+          IconButton(
+            onPressed: () {
+              _showLogoutDialog(context, ref);
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: authState.when(
+          data: (authState) => _buildHomeContent(context, authState, screenSize),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Color(0xFF4D4D4D)),
+                const SizedBox(height: 16),
+                Text(
+                  'Error al cargar información',
+                  style: TextStyle(fontSize: 16, fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => ref.read(authProvider.notifier).refresh(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
-                  const SizedBox(height: 8),
-                  ElevatedButton(
-                    onPressed: () => ref.read(authProvider.notifier).refresh(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.tertiary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: const Text('Reintentar', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              ),
+                  child: const Text('Reintentar', style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ),
         ),
@@ -102,19 +82,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
+        padding: const EdgeInsets.only(top: 32, left: 24, right: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
-
-            // Welcome section with logo
+            // Logo de la Caja
             Container(
               width: screenSize.width * 0.4,
               height: screenSize.width * 0.4,
               constraints: const BoxConstraints(maxWidth: 160, maxHeight: 160),
               decoration: ShapeDecoration(
-                image: const DecorationImage(image: AssetImage("assets/images/LogoCaja.png"), fit: BoxFit.cover),
+                image: const DecorationImage(image: AssetImage("assets/images/logo_caja.png"), fit: BoxFit.cover),
                 shape: RoundedRectangleBorder(
                   side: const BorderSide(width: 2, color: Colors.white),
                   borderRadius: BorderRadius.circular(12),
@@ -127,7 +105,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             const SizedBox(height: 24),
 
-            // Welcome message
             Text(
               '¡Bienvenido!',
               textAlign: TextAlign.center,
@@ -137,20 +114,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 fontFamily: 'Montserrat',
                 fontWeight: FontWeight.w700,
               ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Switch(
-              value: utilizarBiometriaLogin,
-              onChanged: (value) {
-                ref.read(authProvider.notifier).actualizarPreferenciaBiometria(value);
-                ref.read(authProvider.notifier).getBiometriaHabilitada().then((value) {
-                  setState(() {
-                    utilizarBiometriaLogin = value;
-                  });
-                });
-              },
             ),
 
             const SizedBox(height: 8),
@@ -187,7 +150,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.person, size: 20),
+                        Icon(Icons.person, size: 20, color: Theme.of(context).colorScheme.tertiary),
                         const SizedBox(width: 8),
                         Text(
                           'Información Personal',
@@ -195,10 +158,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 20),
+                    _buildInfoCard(
+                      icon: Icons.badge_outlined,
+                      label: 'Número de afiliado',
+                      value: usuario.nroAfiliado.toString(),
+                    ),
                     const SizedBox(height: 16),
-                    _buildInfoRow('Número de Afiliado', usuario.nroAfiliado.toString()),
-                    const SizedBox(height: 12),
-                    _buildInfoRow('Nombre Completo', usuario.apellidoNombres),
+                    _buildInfoCard(
+                      icon: Icons.email_outlined,
+                      label: 'Correo electrónico registrado',
+                      value: usuario.datosUsuario?.email ?? 'No disponible',
+                    ),
                   ],
                 ),
               ),
@@ -238,7 +209,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             icon: Icons.post_add,
                             label: 'Nueva boleta',
                             onPressed: () {
-                              ref.read(navigationProvider.notifier).selectTab(1, routeName: '/crear-boleta');
+                              ref.read(navigationProvider.notifier).selectTab(2, routeName: '/crear-boleta');
                             },
                           ),
                         ),
@@ -248,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             icon: Icons.payment,
                             label: 'Pagos',
                             onPressed: () {
-                              ref.read(navigationProvider.notifier).selectTab(2);
+                              ref.read(navigationProvider.notifier).selectTab(3, routeName: '/procesar-pago');
                             },
                           ),
                         ),
@@ -262,7 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             icon: Icons.history,
                             label: 'Boletas',
                             onPressed: () {
-                              Navigator.pushNamed(context, '/historial-boletas');
+                              ref.read(navigationProvider.notifier).selectTab(2, routeName: '/historial-boletas');
                             },
                           ),
                         ),
@@ -272,7 +243,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             icon: Icons.settings,
                             label: 'Configuración',
                             onPressed: () {
-                              _showComingSoonDialog(context, 'Configuración');
+                              ref.read(navigationProvider.notifier).selectTab(3, routeName: '/settings');
                             },
                           ),
                         ),
@@ -282,29 +253,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
             ],
-
-            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildInfoCard({required IconData icon, required String label, required String value}) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            '$label:',
-            style: TextStyle(color: Color(0xFF828282), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w500),
-          ),
-        ),
+        Icon(icon, size: 20, color: Theme.of(context).colorScheme.tertiary),
+        const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            value,
-            style: TextStyle(color: Color(0xFF4D4D4D), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w600),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF828282),
+                  fontSize: 12,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: Color(0xFF4D4D4D),
+                  fontSize: 15,
+                  fontFamily: 'Inter',
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
+            ],
           ),
         ),
       ],
@@ -374,32 +359,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showComingSoonDialog(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          feature,
-          style: TextStyle(color: Color(0xFF4D4D4D), fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
-        ),
-        content: const Text(
-          'Esta funcionalidad estará disponible próximamente.',
-          style: TextStyle(color: Color(0xFF4D4D4D), fontFamily: 'Inter'),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4D4D4D),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Entendido', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

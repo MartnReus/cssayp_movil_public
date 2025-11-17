@@ -36,34 +36,48 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    // Tabla boletas_generadas
     await db.execute('''
-      CREATE TABLE boletas_historial (
-        id INTEGER PRIMARY KEY,
-        tipo TEXT NOT NULL,
-        monto REAL NOT NULL,
-        fecha_impresion TEXT NOT NULL,
-        fecha_vencimiento TEXT NOT NULL,
-        cod_barra TEXT,
-        id_boleta_asociada INTEGER,
-        fecha_pago TEXT,
-        importe_pago REAL,
-        caratula TEXT NOT NULL,
-        nro_expediente INTEGER,
-        anio_expediente INTEGER,
-        cuij INTEGER,
-        gastos_administrativos REAL,
-        fecha_sync TEXT NOT NULL,
-        created_at TEXT NOT NULL
-      )
-    ''');
+    CREATE TABLE boletas_generadas (
+      id INTEGER PRIMARY KEY,
+      tipo TEXT NOT NULL,
+      monto REAL NOT NULL,
+      fecha_impresion TEXT NOT NULL,
+      fecha_vencimiento TEXT NOT NULL,
+      cod_barra TEXT,
+      id_boleta_asociada INTEGER,
+      fecha_pago TEXT,
+      importe_pago REAL,
+      caratula TEXT NOT NULL,
+      nro_expediente INTEGER,
+      anio_expediente INTEGER,
+      cuij INTEGER,
+      gastos_administrativos REAL,
+      fecha_sync TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      id_operacion INTEGER, 
+      FOREIGN KEY (id_operacion) REFERENCES comprobantes(id_operacion)
+    )
+  ''');
 
     await db.execute('''
-      CREATE INDEX idx_boletas_caratula ON boletas_historial(caratula)
-    ''');
+    CREATE INDEX idx_boletas_caratula ON boletas_generadas(caratula)
+  ''');
 
     await db.execute('''
-      CREATE INDEX idx_boletas_fecha_impresion ON boletas_historial(fecha_impresion)
-    ''');
+    CREATE INDEX idx_boletas_fecha_impresion ON boletas_generadas(fecha_impresion)
+  ''');
+
+    // Tabla comprobantes
+    await db.execute('''
+    CREATE TABLE comprobantes (
+      id_operacion INTEGER PRIMARY KEY,
+      external_reference_id TEXT NOT NULL,
+      fecha TEXT NOT NULL,
+      importe REAL NOT NULL,
+      metodo_pago TEXT NOT NULL
+    )
+  ''');
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {

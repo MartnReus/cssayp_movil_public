@@ -1,3 +1,4 @@
+import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,6 +87,12 @@ void main() {
       // En estado de carga, no hay ListView, solo CircularProgressIndicator
       expect(find.byType(ListView), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // TODO: Mock del provider para que no haga una request real porque falla.
+      await tester.pumpAndSettle();
+      // Después de settle, verificar si aparece ListView (dependiendo del estado simulado)
+      expect(find.byType(RefreshIndicator), findsOneWidget);
+      expect(find.byType(ListView), findsOneWidget);
     });
 
     test('debe ser un ConsumerStatefulWidget', () {

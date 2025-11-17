@@ -25,7 +25,7 @@ class BiometricAuthService {
     try {
       final bool didAuthenticate = await _auth.authenticate(
         localizedReason: 'La aplicación necesita verificar su identidad',
-        options: const AuthenticationOptions(stickyAuth: true, biometricOnly: false),
+        persistAcrossBackgrounding: true,
       );
 
       if (didAuthenticate) {

@@ -44,8 +44,8 @@ class _ProcesarPagoScreenState extends ConsumerState<ProcesarPagoScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFEEF9FF),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF173664),
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         title: const Text(
           "Procesar Pago",
           style: TextStyle(fontFamily: "Montserrat", fontWeight: FontWeight.w600, fontSize: 18),

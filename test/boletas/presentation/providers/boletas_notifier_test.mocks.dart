@@ -104,19 +104,19 @@ class MockObtenerHistorialBoletasUseCase extends _i1.Mock
   @override
   _i7.Future<_i4.HistorialBoletasSuccessResponse> execute({
     int? page,
-    int? mostrarPagadas = 1,
+    String? filtroEstado = 'todas',
   }) =>
       (super.noSuchMethod(
             Invocation.method(#execute, [], {
               #page: page,
-              #mostrarPagadas: mostrarPagadas,
+              #filtroEstado: filtroEstado,
             }),
             returnValue: _i7.Future<_i4.HistorialBoletasSuccessResponse>.value(
               _FakeHistorialBoletasSuccessResponse_2(
                 this,
                 Invocation.method(#execute, [], {
                   #page: page,
-                  #mostrarPagadas: mostrarPagadas,
+                  #filtroEstado: filtroEstado,
                 }),
               ),
             ),
@@ -126,7 +126,7 @@ class MockObtenerHistorialBoletasUseCase extends _i1.Mock
                     this,
                     Invocation.method(#execute, [], {
                       #page: page,
-                      #mostrarPagadas: mostrarPagadas,
+                      #filtroEstado: filtroEstado,
                     }),
                   ),
                 ),
@@ -473,13 +473,4 @@ class MockBoletasLocalDataSource extends _i1.Mock
             ),
           )
           as _i5.BoletaEntity);
-
-  @override
-  _i5.BoletaTipo stringToBoletaTipo(String? tipo) =>
-      (super.noSuchMethod(
-            Invocation.method(#stringToBoletaTipo, [tipo]),
-            returnValue: _i5.BoletaTipo.inicio,
-            returnValueForMissingStub: _i5.BoletaTipo.inicio,
-          )
-          as _i5.BoletaTipo);
 }

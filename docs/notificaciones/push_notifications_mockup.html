@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notificaciones Push - Caja de Abogados</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 380px;
+            background: #1a1a1a;
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .phone-screen {
+            background: #000;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .time {
+            font-size: 15px;
+        }
+
+        .indicators {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .notification-area {
+            padding: 20px 12px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+            min-height: 600px;
+        }
+
+        .notification {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .app-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a8a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .app-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            flex-grow: 1;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .notification-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .notification-body {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .notification.type-1 .app-icon {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a8a 100%);
+        }
+
+        .notification.type-2 .app-icon {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a8a 100%);
+        }
+
+        .notification.type-3 .app-icon {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a8a 100%);
+        }
+
+        .notification.type-4 .app-icon {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .label {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+            display: inline-block;
+        }
+
+        @media (max-width: 420px) {
+            .phone-container {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 Notificaciones Push</h1>
+        <p>Caja de Abogados y Procuradores de Santa Fe</p>
+    </div>
+
+    <div class="phone-container">
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span class="time">9:41</span>
+                <div class="indicators">
+                    <span>📶</span>
+                    <span>📡</span>
+                    <span>🔋</span>
+                </div>
+            </div>
+            
+            <div class="notification-area" id="notificationArea">
+                <!-- Las notificaciones se cargarán aquí -->
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn active" onclick="showNotification(1)">Tipo 1: Por Vencer</button>
+        <button class="btn" onclick="showNotification(2)">Tipo 2: Pendiente</button>
+        <button class="btn" onclick="showNotification('3a')">Tipo 3a: Aportes < 50%</button>
+        <button class="btn" onclick="showNotification('3b')">Tipo 3b: Aportes > 50%</button>
+        <button class="btn" onclick="showNotification(4)">Tipo 4: Pago Confirmado</button>
+        <button class="btn" onclick="showAllNotifications()">Ver Todas</button>
+    </div>
+
+    <script>
+        const notifications = {
+            1: {
+                type: 'type-1',
+                title: 'Boleta por vencer',
+                body: 'Tu boleta vence mañana. No olvides abonarla para mantener tus aportes al día.',
+                time: 'ahora',
+                label: 'Urgente - Vence en 1 día'
+            },
+            2: {
+                type: 'type-2',
+                title: 'Boleta pendiente',
+                body: 'Tenés una boleta sin abonar. Recordá que podés realizar el pago desde la app para mantener tus aportes al día.',
+                time: 'hace 2 h',
+                label: 'Recordatorio'
+            },
+            '3a': {
+                type: 'type-3',
+                title: 'Recordatorio de aportes',
+                body: '¿Todavía no alcanzaste el aporte mínimo anual? Recordá que podés generar nuevas boletas para llevar tus aportes al día.',
+                time: 'hace 1 día',
+                label: 'Recordatorio'
+            },
+            '3b': {
+                type: 'type-3',
+                title: '¡Ya estás a un paso!',
+                body: '¡Ya estás a un paso de cubrir el aporte mínimo anual! Solo te falta $15.000 para cubrir el año.',
+                time: 'hace 1 día',
+                label: 'Más del 50% cubierto'
+            },
+            4: {
+                type: 'type-4',
+                title: '¡Pago confirmado!',
+                body: 'Tu aporte fue imputado exitosamente. Ya podés visualizarlo en tu historial de aportes.',
+                time: 'hace 5 min',
+                label: 'Pago imputado correctamente'
+            }
+        };
+
+        function createNotificationHTML(notification) {
+            return `
+                <div class="notification ${notification.type}">
+                    <div class="notification-header">
+                        <div class="app-icon">CA</div>
+                        <span class="app-name">CSSAyP Móvil</span>
+                        <span class="notification-time">${notification.time}</span>
+                    </div>
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-body">${notification.body}</div>
+                </div>
+            `;
+        }
+
+        function showNotification(type) {
+            const area = document.getElementById('notificationArea');
+            const notification = notifications[type];
+            
+            if (!notification) {
+                console.error('Notification type not found:', type);
+                return;
+            }
+            
+            area.innerHTML = `
+                <div style="text-align: center; padding: 40px 20px;">
+                    <span class="label">${notification.label}</span>
+                </div>
+                ${createNotificationHTML(notification)}
+            `;
+
+            // Update active button
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        function showAllNotifications() {
+            const area = document.getElementById('notificationArea');
+            let html = `
+                <div style="text-align: center; padding: 20px 20px 30px;">
+                    <span class="label">Todas las notificaciones</span>
+                </div>
+            `;
+            
+            html += createNotificationHTML(notifications[1]);
+            html += createNotificationHTML(notifications[2]);
+            html += createNotificationHTML(notifications['3a']);
+            html += createNotificationHTML(notifications['3b']);
+            html += createNotificationHTML(notifications[4]);
+            
+            area.innerHTML = html;
+
+            // Update active button
+            document.querySelectorAll('.btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Show notification type 1 by default
+        window.onload = function() {
+            showNotification(1);
+        };
+    </script>
+</body>
+</html>

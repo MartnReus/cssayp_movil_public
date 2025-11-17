@@ -47,13 +47,17 @@ class MockLocalAuthentication extends _i1.Mock
       _i4.AndroidAuthMessages(),
       _i6.WindowsAuthMessages(),
     ],
-    _i4.AuthenticationOptions? options = const _i4.AuthenticationOptions(),
+    bool? biometricOnly = false,
+    bool? sensitiveTransaction = true,
+    bool? persistAcrossBackgrounding = false,
   }) =>
       (super.noSuchMethod(
             Invocation.method(#authenticate, [], {
               #localizedReason: localizedReason,
               #authMessages: authMessages,
-              #options: options,
+              #biometricOnly: biometricOnly,
+              #sensitiveTransaction: sensitiveTransaction,
+              #persistAcrossBackgrounding: persistAcrossBackgrounding,
             }),
             returnValue: _i3.Future<bool>.value(false),
             returnValueForMissingStub: _i3.Future<bool>.value(false),

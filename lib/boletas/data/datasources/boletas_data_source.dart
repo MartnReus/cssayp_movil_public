@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cssayp_movil/boletas/boletas.dart';
+import 'package:cssayp_movil/boletas/data/models/juicios_abiertos_response.dart';
 import 'package:cssayp_movil/boletas/data/models/paginated_response_model.dart';
 import 'package:cssayp_movil/config.dart';
 import 'package:http/http.dart' as http;
@@ -113,12 +114,12 @@ class BoletasDataSource {
   Future<HistorialBoletasResponse> obtenerHistorialBoletas({
     required int nroAfiliado,
     int? page,
-    int mostrarPagadas = 1,
+    String filtroEstado = 'todas',
   }) async {
     try {
-      final uri = Uri.parse('${AppConfig.consultaApiURL}/api/v1/boletasByNafPaginated/$nroAfiliado').replace(
-        queryParameters: {'mostrar_pagadas': mostrarPagadas.toString(), if (page != null) 'page': page.toString()},
-      );
+      final uri = Uri.parse(
+        '${AppConfig.consultaApiURL}/api/v1/boletasByNafPaginated/$nroAfiliado',
+      ).replace(queryParameters: {if (page != null) 'page': page.toString(), 'filtro_estado': filtroEstado});
 
       final response = await client.get(uri);
 
@@ -180,6 +181,29 @@ class BoletasDataSource {
       throw Exception('Error del servidor, intente nuevamente más tarde');
     } catch (e) {
       throw Exception('Error inesperado al buscar boletas de inicio pagadas: $e');
+    }
+  }
+
+  Future<JuiciosAbiertosPaginatedResponse> obtenerJuiciosAbiertos({required int nroAfiliado, int page = 1}) async {
+    try {
+      final uri = Uri.parse(
+        '${AppConfig.consultaApiURL}/api/v1/juiciosAbiertos/$nroAfiliado',
+      ).replace(queryParameters: {'page': page.toString()});
+      final response = await client.get(uri);
+
+      if (response.statusCode == 200) {
+        return JuiciosAbiertosPaginatedResponse.fromJson(response.statusCode, json.decode(response.body));
+      } else {
+        throw Exception('Error al obtener juicios abiertos: ${response.statusCode}');
+      }
+    } on SocketException catch (_) {
+      throw Exception('Error en la conexión con el servidor');
+    } on TimeoutException catch (_) {
+      throw Exception('Error en la conexión con el servidor');
+    } on FormatException catch (_) {
+      throw Exception('Error del servidor, intente nuevamente más tarde');
+    } catch (e) {
+      throw Exception('Error inesperado al obtener juicios abiertos: $e');
     }
   }
 }

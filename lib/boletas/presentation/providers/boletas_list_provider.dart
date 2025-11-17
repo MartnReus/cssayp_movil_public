@@ -87,7 +87,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
     return state.value!;
   }
 
-  Future<void> obtenerBoletasCreadas({int? page, bool forceRefresh = false}) async {
+  Future<void> obtenerBoletasCreadas({int? page, bool forceRefresh = false, String filtroEstado = 'todas'}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final isOnline = ref.read(connectivityProvider).value == ConnectivityStatus.online;
@@ -99,7 +99,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
 
       if (isOnline) {
         try {
-          final response = await _obtenerHistorialBoletasUseCase.execute(page: currentPage);
+          final response = await _obtenerHistorialBoletasUseCase.execute(page: currentPage, filtroEstado: filtroEstado);
 
           final boletas = response.boletas.map((boletaModel) => _convertirBoletaHistorialAEntity(boletaModel)).toList();
 
@@ -146,8 +146,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
 
       if (isOnline) {
         try {
-          // Usar mostrarPagadas = 0 para ocultar boletas pagadas en la pantalla de pagos
-          final response = await _obtenerHistorialBoletasUseCase.execute(page: currentPage, mostrarPagadas: 0);
+          final response = await _obtenerHistorialBoletasUseCase.execute(page: currentPage, filtroEstado: 'no_pagadas');
 
           final boletas = response.boletas.map((boletaModel) => _convertirBoletaHistorialAEntity(boletaModel)).toList();
 
@@ -199,7 +198,7 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
   BoletaEntity _convertirBoletaHistorialAEntity(BoletaHistorialModel model) {
     return BoletaEntity(
       id: int.tryParse(model.idBoletaGenerada) ?? 0,
-      tipo: _mapTipoBoleta(model.idTipoBoleta),
+      tipo: BoletaTipo.fromId(int.tryParse(model.idTipoTransaccion ?? '0') ?? 0),
       monto: double.tryParse(model.monto) ?? 0.0,
       fechaImpresion: _parseFechaImpresion(model.fechaImpresion),
       fechaVencimiento: _calcularFechaVencimiento(model.fechaImpresion, model.diasVencimiento),
@@ -237,24 +236,6 @@ class BoletasNotifier extends AsyncNotifier<BoletasState> {
     final fechaBase = _parseFechaImpresion(fechaImpresion);
     final dias = int.tryParse(diasVencimiento ?? '') ?? 30;
     return fechaBase.add(Duration(days: dias));
-  }
-
-  BoletaTipo _mapTipoBoleta(String? idTipoBoleta) {
-    if (idTipoBoleta == null) return BoletaTipo.desconocido;
-
-    switch (idTipoBoleta) {
-      case '1':
-      case '2':
-      case '108':
-        return BoletaTipo.inicio;
-      case '6':
-      case '16':
-      case '17':
-      case '106':
-        return BoletaTipo.finalizacion;
-      default:
-        return BoletaTipo.desconocido;
-    }
   }
 
   Future<CrearBoletaInicioResult?> crearBoletaInicio({

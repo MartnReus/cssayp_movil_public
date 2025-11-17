@@ -509,39 +509,5 @@ void main() {
         expect(result.gastosAdministrativos, isNull);
       });
     });
-
-    group('stringToBoletaTipo', () {
-      test('debería convertir "inicio" a BoletaTipo.inicio', () {
-        // Act
-        final result = dataSource.stringToBoletaTipo('inicio');
-
-        // Assert
-        expect(result, BoletaTipo.inicio);
-      });
-
-      test('debería convertir "finalizacion" a BoletaTipo.finalizacion', () {
-        // Act
-        final result = dataSource.stringToBoletaTipo('finalizacion');
-
-        // Assert
-        expect(result, BoletaTipo.finalizacion);
-      });
-
-      test('debería convertir tipo desconocido a BoletaTipo.desconocido', () {
-        // Act
-        final result = dataSource.stringToBoletaTipo('desconocido');
-
-        // Assert
-        expect(result, BoletaTipo.desconocido);
-      });
-
-      test('debería convertir string vacío a BoletaTipo.desconocido', () {
-        // Act
-        final result = dataSource.stringToBoletaTipo('');
-
-        // Assert
-        expect(result, BoletaTipo.desconocido);
-      });
-    });
   });
 }

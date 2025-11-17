@@ -72,9 +72,7 @@ class BoletaEntity {
     return BoletaEntity(
       id: json['id'],
       // id_tipo_transaccion is in (1,3) -> inicio, (2) -> finalizacion
-      tipo: json['id_tipo_transaccion'] == '1' || json['id_tipo_transaccion'] == '3'
-          ? BoletaTipo.inicio
-          : BoletaTipo.finalizacion,
+      tipo: BoletaTipo.fromId(int.tryParse(json['id_tipo_transaccion']?.toString() ?? '') ?? 0),
       monto:
           (double.tryParse(json['montoEntero']?.toString() ?? '0') ?? 0) +
           (double.tryParse(json['montoDecimal']?.toString() ?? '0') ?? 0) / 100,

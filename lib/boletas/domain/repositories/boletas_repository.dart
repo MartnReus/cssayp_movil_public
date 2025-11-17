@@ -21,7 +21,11 @@ abstract interface class BoletasRepository {
     int? anioExpediente,
     int? cuij,
   });
-  Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(int nroAfiliado, {int? page, int mostrarPagadas = 1});
+  Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
+    int nroAfiliado, {
+    int? page,
+    String filtroEstado = 'todas',
+  });
   Future<ParametrosBoletaInicioEntity> obtenerParametrosBoletaInicio(int nroAfiliado);
   Future<PaginatedResponseModel> buscarBoletasInicioPagadas({
     required int nroAfiliado,

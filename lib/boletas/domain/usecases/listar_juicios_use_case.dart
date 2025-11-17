@@ -10,4 +10,3 @@ class ListarJuiciosUseCase {
     return await juiciosRepository.obtenerJuiciosActivos(nroAfiliado);
   }
 }
-

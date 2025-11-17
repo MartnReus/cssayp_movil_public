@@ -457,7 +457,7 @@ void main() {
       );
 
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, filtroEstado: 'todas'),
       ).thenAnswer((_) async => successResponse);
 
       // Act
@@ -471,7 +471,7 @@ void main() {
       expect(result.total, equals(2));
 
       verify(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, filtroEstado: 'todas'),
       ).called(1);
     });
 
@@ -499,7 +499,7 @@ void main() {
       );
 
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: page, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: page, filtroEstado: 'todas'),
       ).thenAnswer((_) async => successResponse);
 
       // Act
@@ -512,7 +512,7 @@ void main() {
       expect(result.total, equals(25));
 
       verify(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: page, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: page, filtroEstado: 'todas'),
       ).called(1);
     });
 
@@ -531,7 +531,7 @@ void main() {
       ];
 
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, filtroEstado: 'todas'),
       ).thenThrow(Exception('API Error'));
 
       when(
@@ -551,7 +551,7 @@ void main() {
       expect(result.perPage, equals(10));
 
       verify(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, filtroEstado: 'todas'),
       ).called(1);
       verify(mockBoletasLocalDataSource.obtenerBoletasLocales(limit: 10, offset: 0)).called(1);
       verify(mockBoletasLocalDataSource.obtenerConteoBoletasLocales()).called(1);
@@ -560,7 +560,7 @@ void main() {
     test('debería lanzar excepción cuando API retorna error y no hay datos locales', () async {
       // Arrange
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, filtroEstado: 'todas'),
       ).thenThrow(Exception('API Error'));
 
       when(mockBoletasLocalDataSource.obtenerBoletasLocales(limit: 10, offset: 0)).thenThrow(Exception('Local Error'));
@@ -574,7 +574,7 @@ void main() {
       );
 
       verify(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, page: null, filtroEstado: 'todas'),
       ).called(1);
       verify(mockBoletasLocalDataSource.obtenerBoletasLocales(limit: 10, offset: 0)).called(1);
     });
@@ -854,7 +854,7 @@ void main() {
       );
 
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, filtroEstado: 'todas'),
       ).thenAnswer((_) async => successResponse);
 
       when(mockBoletasLocalDataSource.limpiarCache()).thenAnswer((_) async {});
@@ -864,7 +864,9 @@ void main() {
       await repository.syncCache(testNroAfiliado);
 
       // Assert
-      verify(mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, mostrarPagadas: 1)).called(1);
+      verify(
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, filtroEstado: 'todas'),
+      ).called(1);
       verify(mockBoletasLocalDataSource.limpiarCache()).called(1);
       verify(mockBoletasLocalDataSource.guardarBoletas(any)).called(1);
     });
@@ -872,14 +874,16 @@ void main() {
     test('debería manejar error en sincronización sin lanzar excepción', () async {
       // Arrange
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, filtroEstado: 'todas'),
       ).thenThrow(Exception('Sync Error'));
 
       // Act
       await repository.syncCache(testNroAfiliado);
 
       // Assert
-      verify(mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, mostrarPagadas: 1)).called(1);
+      verify(
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, filtroEstado: 'todas'),
+      ).called(1);
       verifyNever(mockBoletasLocalDataSource.limpiarCache());
       verifyNever(mockBoletasLocalDataSource.guardarBoletas(any));
     });
@@ -889,14 +893,16 @@ void main() {
       final errorResponse = HistorialBoletasErrorResponse(statusCode: 400, errorMessage: 'Error en API');
 
       when(
-        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, mostrarPagadas: 1),
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, filtroEstado: 'todas'),
       ).thenAnswer((_) async => errorResponse);
 
       // Act
       await repository.syncCache(testNroAfiliado);
 
       // Assert
-      verify(mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, mostrarPagadas: 1)).called(1);
+      verify(
+        mockBoletasDataSource.obtenerHistorialBoletas(nroAfiliado: testNroAfiliado, filtroEstado: 'todas'),
+      ).called(1);
       verifyNever(mockBoletasLocalDataSource.limpiarCache());
       verifyNever(mockBoletasLocalDataSource.guardarBoletas(any));
     });

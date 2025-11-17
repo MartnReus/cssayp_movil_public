@@ -110,7 +110,7 @@ class BoletasRepositoryImpl implements BoletasRepository {
   Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
     int nroAfiliado, {
     int? page,
-    int mostrarPagadas = 1,
+    String filtroEstado = 'todas',
   }) async {
     try {
       // Intentar primero desde API
@@ -118,7 +118,7 @@ class BoletasRepositoryImpl implements BoletasRepository {
         final response = await boletasDataSource.obtenerHistorialBoletas(
           nroAfiliado: nroAfiliado,
           page: page,
-          mostrarPagadas: mostrarPagadas,
+          filtroEstado: filtroEstado,
         );
 
         if (response is HistorialBoletasSuccessResponse) {
@@ -238,7 +238,7 @@ class BoletasRepositoryImpl implements BoletasRepository {
 
   Future<void> syncCache(int nroAfiliado) async {
     try {
-      final response = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado, mostrarPagadas: 1);
+      final response = await boletasDataSource.obtenerHistorialBoletas(nroAfiliado: nroAfiliado);
 
       if (response is HistorialBoletasSuccessResponse) {
         await boletasLocalDataSource.limpiarCache();
