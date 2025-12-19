@@ -32,6 +32,7 @@ class DatosComprobanteSuccessResponse extends DatosComprobanteResponse {
         .map(
           (boleta) => (
             id: boleta['id'] as int,
+            idBoletaGenerada: int.tryParse(boleta['id_boleta_generada']?.toString() ?? '0') ?? 0,
             importe: boleta['importe'] as String,
             caratula: boleta['caratula'] as String,
             mvc: boleta['mvc'] as String,

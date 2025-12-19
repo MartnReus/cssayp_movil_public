@@ -2,12 +2,12 @@ import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/comprobantes/comprobantes.dart';
 import 'package:cssayp_movil/notificaciones/notificaciones.dart';
-import 'package:cssayp_movil/pagos/presentation/screens/pagos_principal_screen.dart';
-import 'package:cssayp_movil/pagos/presentation/screens/procesar_pago_screen.dart';
+import 'package:cssayp_movil/pagos/pagos.dart';
 import 'package:cssayp_movil/shared/providers/navigation_provider.dart';
 import 'package:cssayp_movil/shared/screens/mas_screen.dart';
 import 'package:cssayp_movil/shared/screens/proximamente_screen.dart';
 import 'package:cssayp_movil/shared/screens/settings_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +22,8 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
+    ref.watch(notificationProvider);
+    
     final currentIndex = ref.watch(navigationProvider).index;
     final currentRouteName = ref.watch(navigationProvider).routeName;
 

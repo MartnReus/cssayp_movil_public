@@ -3,6 +3,7 @@ import 'package:cssayp_movil/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cssayp_movil/comprobantes/comprobantes.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ComprobanteFinScreen extends ConsumerStatefulWidget {
   final ComprobanteEntity? comprobante;
@@ -100,7 +101,7 @@ class _ComprobanteFinScreenState extends ConsumerState<ComprobanteFinScreen> {
                     // Total
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.only(top: 15, left: 5, right: 15, bottom: 15),
+                      padding: const EdgeInsets.all(15),
                       decoration: const ShapeDecoration(
                         color: Color(0x192196F3),
                         shape: RoundedRectangleBorder(
@@ -223,7 +224,7 @@ class _ComprobanteFinScreenState extends ConsumerState<ComprobanteFinScreen> {
   Widget _buildDataCard({required String title, required List<Widget> children}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 15, left: 5, right: 15, bottom: 15),
+      padding: const EdgeInsets.all(15),
       decoration: ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -288,15 +289,15 @@ class _ComprobanteFinScreenState extends ConsumerState<ComprobanteFinScreen> {
     if (boletasFin.isEmpty) {
       // Mostrar datos de ejemplo si no hay boletas
       return [
-        _buildBoletaFinRow('CARATULA EJEMPLO 1', '0.0'),
+        _buildBoletaFinRow('CARATULA EJEMPLO 1', '0.0', 0),
         _buildBoletaFinSeparator(),
-        _buildBoletaFinRow('CARATULA EJEMPLO 2', '0.0'),
+        _buildBoletaFinRow('CARATULA EJEMPLO 2', '0.0', 0),
       ];
     }
 
     List<Widget> widgets = [];
     for (int i = 0; i < boletasFin.length; i++) {
-      widgets.add(_buildBoletaFinRow(boletasFin[i].caratula, boletasFin[i].importe));
+      widgets.add(_buildBoletaFinRow(boletasFin[i].caratula, boletasFin[i].importe, boletasFin[i].idBoletaGenerada));
       if (i < boletasFin.length - 1) {
         widgets.add(_buildBoletaFinSeparator());
       }
@@ -304,37 +305,46 @@ class _ComprobanteFinScreenState extends ConsumerState<ComprobanteFinScreen> {
     return widgets;
   }
 
-  Widget _buildBoletaFinRow(String descripcion, String monto) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildBoletaFinRow(String descripcion, String monto, int idBoletaGenerada) {
+    final qrUrl = 'https://consultaapi.capsantafe.org.ar/api/v1/boletaEstadoById/$idBoletaGenerada';
+
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 3,
-          child: Text(
-            descripcion,
-            style: const TextStyle(
-              color: Color(0xFF111112),
-              fontSize: 16,
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w500,
-              height: 1.25,
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              descripcion,
+              style: const TextStyle(
+                color: Color(0xFF111112),
+                fontSize: 16,
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.w500,
+                height: 1.25,
+              ),
             ),
-          ),
+            const SizedBox(height: 4),
+            Text(
+              '\$ $monto',
+              style: const TextStyle(
+                color: Color(0xFF111112),
+                fontSize: 16,
+                fontFamily: 'Montserrat',
+                fontWeight: FontWeight.w500,
+                height: 1.25,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          flex: 1,
-          child: Text(
-            '\$ $monto',
-            textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Color(0xFF111112),
-              fontSize: 16,
-              fontFamily: 'Montserrat',
-              fontWeight: FontWeight.w500,
-              height: 1.25,
-            ),
+        const SizedBox(height: 12),
+        Center(
+          child: QrImageView(
+            data: qrUrl,
+            version: QrVersions.auto,
+            size: 180.0,
+            errorCorrectionLevel: QrErrorCorrectLevel.L,
+            backgroundColor: Colors.white,
           ),
         ),
       ],

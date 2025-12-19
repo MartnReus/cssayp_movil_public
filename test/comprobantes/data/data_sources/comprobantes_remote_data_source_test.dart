@@ -35,6 +35,7 @@ void main() {
         'boletas_pagadas': [
           {
             'id': 789,
+            'id_boleta_generada': 999,
             'importe': '1500.00',
             'caratula': 'Test Caratula',
             'mvc': 'TEST-123',

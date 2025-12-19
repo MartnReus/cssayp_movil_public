@@ -44,7 +44,7 @@ El sistema evalúa secuencialmente las siguientes condiciones para determinar qu
 - **Canal:** notificación push.
 
 ### 4.3. Aportes mínimos no cubiertos
-- **Condición:** no existen boletas pendientes, pero el afiliado no alcanza el aporte mínimo correspondiente a la categoría básica.  
+- **Condición:** no existen boletas pendientes, pero el afiliado no alcanza el aporte mínimo correspondiente a la categoría básica. Utilizar variante si el afiliado ya cubrió al menos el 75% aporte mínimo.
 - **Acción:** enviar recordatorio general para realizar nuevos aportes.  
 - **Canal:** notificación push.
 

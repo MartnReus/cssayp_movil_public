@@ -15,6 +15,7 @@
 |Consultar comprobante desde historial                  |El afiliado accede a una boleta pagada desde su historial para ver el comprobante|
 |Visualizar comprobante digital                         |El sistema muestra los datos esenciales del comprobante (número, fecha, monto, etc.)|
 |Descargar comprobante PDF                              |El afiliado descarga el comprobante en formato PDF oficial desde la app|
+|Compartir comprobante digital                          |El afiliado comparte el comprobante digital a través de diferentes medios (correo, mensajería, etc.)|
 
 # Casos de Uso principales y flujos
 ### Caso de uso: Generar comprobante digital (flujo automático)
@@ -98,5 +99,32 @@ El afiliado descarga el comprobante en formato PDF oficial conforme a las normas
 **Relaciones:**  
 - «include» con *Visualizar comprobante digital*.  
 - «extend» desde *Consultar comprobante desde historial*.
+
+---
+
+### Caso de uso: Compartir comprobante digital (extend de Visualizar comprobante digital)
+**Descripción:**  
+El afiliado comparte el comprobante digital a través de diferentes medios de comunicación disponibles en el dispositivo móvil.
+
+**Flujo principal:**  
+1. Desde la pantalla de visualización del comprobante, el afiliado selecciona "Compartir comprobante".  
+2. El sistema presenta las opciones de compartir disponibles (correo electrónico, mensajería, aplicaciones de almacenamiento en la nube, etc.).  
+3. El afiliado selecciona el medio por el cual desea compartir el comprobante.  
+4. El sistema genera el comprobante en formato compartible (PDF o imagen) según el medio seleccionado.  
+5. Se abre la aplicación correspondiente con el comprobante listo para compartir.  
+6. El afiliado completa el proceso de compartir desde la aplicación seleccionada.
+
+**Precondiciones:**  
+- El comprobante debe estar disponible y visualizado previamente.  
+- El dispositivo debe tener aplicaciones instaladas que permitan compartir archivos.
+
+**Postcondiciones:**  
+- El comprobante queda compartido a través del medio seleccionado por el afiliado.
+
+**Flujo alternativo:**  
+- **A1:** Si no hay aplicaciones disponibles para compartir, el sistema informa al afiliado y sugiere instalar una aplicación compatible.
+
+**Relaciones:**  
+- «extend» desde *Visualizar comprobante digital*.
 
 ![Diagrama](/docs/comprobantes/uml/CU_Modulo_de_generacion_de_comprobantes.png)  

@@ -408,7 +408,7 @@ class MockBoletasRepositoryComplete extends Mock implements BoletasRepository {
   Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
     int nroAfiliado, {
     int? page,
-    int mostrarPagadas = 1,
+    String filtroEstado = 'todas',
   }) async {
     final boletas = [
       BoletaHistorialModel(

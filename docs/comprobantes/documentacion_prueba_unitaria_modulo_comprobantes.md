@@ -15,10 +15,10 @@ El uso combinado de estas herramientas permite garantizar la calidad del código
 ### Alcance
 
 #### Total de Pruebas por Capa
-- **Capa de Datos:** 20 pruebas
-- **Capa de Dominio:** 14 pruebas
-- **Capa de Presentación:** 13 pruebas
-- **Total:** 47 pruebas unitarias
+- **Capa de Datos:** 21 pruebas
+- **Capa de Dominio:** 13 pruebas
+- **Capa de Presentación:** 12 pruebas
+- **Total:** 46 pruebas unitarias
 
 #### Funcionalidades Cubiertas
 - Obtención de datos de comprobantes desde API remota
@@ -45,9 +45,9 @@ El uso combinado de estas herramientas permite garantizar la calidad del código
 
 ### Detalles por Capa
 
-#### Capa de Datos (20 pruebas)
+#### Capa de Datos (21 pruebas)
 **DataSources:**
-- `comprobantes_remote_data_source_test.dart`: 10 pruebas
+- `comprobantes_remote_data_source_test.dart`: 11 pruebas
   - Obtención exitosa de datos de comprobantes (status 200)
   - Manejo de errores del servidor (400, 404, 500)
   - Manejo de errores de conexión (SocketException, TimeoutException)
@@ -69,26 +69,30 @@ El uso combinado de estas herramientas permite garantizar la calidad del código
   - Manejo de comprobantes con montos de organismos complejos
   - Verificación de que no se utiliza el data source local
 
-#### Capa de Dominio (14 pruebas)
+#### Capa de Dominio (13 pruebas)
 **Use Cases:**
-- `descargar_comprobante_usecase_test.dart`: 14 pruebas
+- `generar_comprobante_usecase_test.dart`: 4 pruebas
   - Generación exitosa de PDF de comprobante
   - Validación de autenticación de usuario
   - Propagación de excepciones del servicio de PDF
   - Validación de parámetros pasados al servicio de PDF
+
+- `compartir_comprobante_usecase_test.dart`: 9 pruebas
   - Generación y compartición exitosa de comprobantes
   - Validación de parámetros de compartición (texto, subject, archivo)
   - Manejo de diferentes estados de compartición (success, dismissed, unavailable)
-  - Validación de orden de ejecución (usuario -> PDF -> share)
+  - Validación de orden de ejecución (PDF -> share)
   - Manejo de errores durante la generación de PDF
   - Validación de comprobantes con diferentes IDs
   - Verificación de que no se comparte si falla la generación de PDF
+  - Validación del asunto correcto en los parámetros de compartir
+  - Validación del archivo como XFile con la ruta correcta
 
-#### Capa de Presentación (13 pruebas)
+#### Capa de Presentación (12 pruebas)
 **Providers:**
-- `comprobantes_notifier_test.dart`: 13 pruebas
+- `comprobantes_notifier_test.dart`: 12 pruebas
   - Creación de estados con comprobantes
-  - Operaciones copyWith e inmutabilidad de estados
+  - Operaciones copyWith e inmutabilidad de estados (2 pruebas)
   - Inicialización con estado vacío por defecto
   - Obtención exitosa de comprobantes y actualización de estado
   - Manejo de errores y estados AsyncError

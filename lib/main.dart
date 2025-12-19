@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/boletas/boletas.dart';
@@ -11,7 +13,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:cssayp_movil/shared/providers/connectivity_provider.dart';
 import 'package:cssayp_movil/shared/widgets/offline_notification.dart';
 
-void main() {
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("Handling a background message: ${message.messageId}");
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Estilos del sistema operativo
@@ -28,6 +38,10 @@ void main() {
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+  }
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (Platform.isAndroid || Platform.isIOS) {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   runApp(const ProviderScope(child: MyApp()));

@@ -294,12 +294,8 @@ class MockBoletasRepositoryComplete extends Mock implements BoletasRepository {
   Future<HistorialBoletasSuccessResponse> obtenerHistorialBoletas(
     int nroAfiliado, {
     int? page,
-    int mostrarPagadas = 1,
+    String filtroEstado = 'todas',
   }) async {
-    print(
-      '🔍 MockBoletasRepository.obtenerHistorialBoletas called with nroAfiliado: $nroAfiliado, page: $page, mostrarPagadas: $mostrarPagadas',
-    );
-
     // Simular respuesta de boletas pendientes (solo finalización para estas pruebas)
     final boletas = [
       BoletaHistorialModel(
@@ -423,7 +419,7 @@ void main() {
     });
 
     tearDown(() async {
-      await Future.delayed(const Duration(seconds: 8));
+      await Future.delayed(const Duration(seconds: 2));
     });
 
     tearDownAll(() async {

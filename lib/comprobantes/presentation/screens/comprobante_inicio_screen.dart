@@ -3,6 +3,7 @@ import 'package:cssayp_movil/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cssayp_movil/comprobantes/comprobantes.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ComprobanteInicioScreen extends ConsumerStatefulWidget {
   final ComprobanteEntity? comprobante;
@@ -82,50 +83,68 @@ class _ComprobanteInicioScreenState extends ConsumerState<ComprobanteInicioScree
                     _buildDataCard(
                       title: 'BOLETA ÚNICA DE INICIACIÓN DE JUICIO',
                       children: [
-                        SizedBox(
-                          width: 326,
-                          child: Text(
-                            primeraBoleta?.caratula ?? 'CARÁTULA BUIJ',
-                            style: const TextStyle(
-                              color: Color(0xFF111112),
-                              fontSize: 16,
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.w500,
-                              height: 1.25,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 326,
+                              child: Text(
+                                primeraBoleta?.caratula ?? 'CARÁTULA BUIJ',
+                                style: const TextStyle(
+                                  color: Color(0xFF111112),
+                                  fontSize: 16,
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.25,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          width: 326,
-                          height: 19,
-                          child: Text(
-                            primeraBoleta?.tipoJuicio ?? '',
-                            style: const TextStyle(
-                              color: Color(0xFF666666),
-                              fontSize: 16,
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.w500,
-                              height: 1.25,
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: 326,
+                              height: 19,
+                              child: Text(
+                                primeraBoleta?.tipoJuicio ?? '',
+                                style: const TextStyle(
+                                  color: Color(0xFF666666),
+                                  fontSize: 16,
+                                  fontFamily: 'Montserrat',
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.25,
+                                ),
+                              ),
                             ),
-                          ),
+                            _buildDataRow(
+                              'Caja de Seguridad Social de Abogados y procuradores:  ',
+                              '\$ ${primeraBoleta?.importe ?? 'Monto'}',
+                            ),
+                            _buildDataRow(
+                              'Colegio de Abogados: ',
+                              '\$ ${primeraBoleta?.montosOrganismos?.firstWhere((monto) => monto.organismo == "colegio_abogados", orElse: () => ({"circunscripcion": 0, "monto": 0.0, "organismo": "colegio_abog"} as MontoOrganismo)).monto.toStringAsFixed(2) ?? "0"}',
+                            ),
+                            _buildDataRow(
+                              'Caja Forense: ',
+                              '\$ ${primeraBoleta?.montosOrganismos?.firstWhere((monto) => monto.organismo == "caja_forense", orElse: () => ({"circunscripcion": 0, "monto": 0.0, "organismo": "caja_forense"} as MontoOrganismo)).monto.toStringAsFixed(2) ?? "0"}',
+                            ),
+                            // _buildDataRow(
+                            //   'Gastos administrativos: ',
+                            //   '\$ ${comprobante?.montoGastosAdministrativos.toStringAsFixed(2) ?? 'Monto'}',
+                            // ),
+                            if (primeraBoleta != null && primeraBoleta.idBoletaGenerada > 0) ...[
+                              const SizedBox(height: 12),
+                              Center(
+                                child: QrImageView(
+                                  data:
+                                      'https://consultaapi.capsantafe.org.ar/api/v1/boletaEstadoById/${primeraBoleta.idBoletaGenerada}',
+                                  version: QrVersions.auto,
+                                  size: 180.0,
+                                  errorCorrectionLevel: QrErrorCorrectLevel.L,
+                                  backgroundColor: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                        _buildDataRow(
-                          'Caja de Seguridad Social de Abogados y procuradores:  ',
-                          '\$ ${primeraBoleta?.importe ?? 'Monto'}',
-                        ),
-                        _buildDataRow(
-                          'Colegio de Abogados: ',
-                          '\$ ${primeraBoleta?.montosOrganismos?.firstWhere((monto) => monto.organismo == "colegio_abogados", orElse: () => ({"circunscripcion": 0, "monto": 0.0, "organismo": "colegio_abog"} as MontoOrganismo)).monto.toStringAsFixed(2) ?? "0"}',
-                        ),
-                        _buildDataRow(
-                          'Caja Forense: ',
-                          '\$ ${primeraBoleta?.montosOrganismos?.firstWhere((monto) => monto.organismo == "caja_forense", orElse: () => ({"circunscripcion": 0, "monto": 0.0, "organismo": "caja_forense"} as MontoOrganismo)).monto.toStringAsFixed(2) ?? "0"}',
-                        ),
-                        // _buildDataRow(
-                        //   'Gastos administrativos: ',
-                        //   '\$ ${comprobante?.montoGastosAdministrativos.toStringAsFixed(2) ?? 'Monto'}',
-                        // ),
                       ],
                     ),
 
@@ -146,7 +165,7 @@ class _ComprobanteInicioScreenState extends ConsumerState<ComprobanteInicioScree
                     // Total
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.only(top: 15, left: 5, right: 15, bottom: 15),
+                      padding: const EdgeInsets.all(15),
                       decoration: const ShapeDecoration(
                         color: Color(0x192196F3),
                         shape: RoundedRectangleBorder(
@@ -269,7 +288,7 @@ class _ComprobanteInicioScreenState extends ConsumerState<ComprobanteInicioScree
   Widget _buildDataCard({required String title, required List<Widget> children}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.only(top: 15, left: 5, right: 15, bottom: 15),
+      padding: const EdgeInsets.all(15),
       decoration: ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

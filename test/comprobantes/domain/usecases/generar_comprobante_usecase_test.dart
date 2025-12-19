@@ -38,6 +38,7 @@ void main() {
       boletasPagadas: [
         (
           id: 789,
+          idBoletaGenerada: 999,
           importe: '1500.00',
           caratula: 'Test Caratula',
           mvc: 'TEST-123',

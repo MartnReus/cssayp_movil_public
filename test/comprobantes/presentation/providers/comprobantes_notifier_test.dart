@@ -119,6 +119,7 @@ void main() {
         boletasPagadas: [
           (
             id: 789,
+            idBoletaGenerada: 999,
             importe: '1500.00',
             caratula: 'Test Caratula',
             mvc: 'TEST-123',
@@ -151,23 +152,24 @@ void main() {
     test(
       'obtenerComprobante debería establecer el state en AsyncError cuando el use case lanza una excepción',
       () async {
-      // Arrange
-      const testIdBoleta = 123;
-      final testException = Exception('Error al obtener comprobante');
+        // Arrange
+        const testIdBoleta = 123;
+        final testException = Exception('Error al obtener comprobante');
 
-      when(mockObtenerComprobanteUseCase.execute(testIdBoleta)).thenThrow(testException);
+        when(mockObtenerComprobanteUseCase.execute(testIdBoleta)).thenThrow(testException);
 
-      final notifier = container.read(comprobantesProvider.notifier);
+        final notifier = container.read(comprobantesProvider.notifier);
 
-      // Act
-      await notifier.obtenerComprobante(testIdBoleta);
+        // Act
+        await notifier.obtenerComprobante(testIdBoleta);
 
-      // Assert
-      final state = container.read(comprobantesProvider);
-      expect(state.hasError, true);
-      expect(state.error, testException);
-      verify(mockObtenerComprobanteUseCase.execute(testIdBoleta)).called(1);
-    });
+        // Assert
+        final state = container.read(comprobantesProvider);
+        expect(state.hasError, true);
+        expect(state.error, testException);
+        verify(mockObtenerComprobanteUseCase.execute(testIdBoleta)).called(1);
+      },
+    );
 
     test('obtenerComprobante debería pasar el idBoletaPagada correcto al use case', () async {
       // Arrange
@@ -244,6 +246,7 @@ void main() {
         boletasPagadas: [
           (
             id: 100,
+            idBoletaGenerada: 101,
             importe: '1000.00',
             caratula: 'Caratula 1',
             mvc: 'MVC-001',
@@ -252,6 +255,7 @@ void main() {
           ),
           (
             id: 200,
+            idBoletaGenerada: 201,
             importe: '1500.50',
             caratula: 'Caratula 2',
             mvc: 'MVC-002',

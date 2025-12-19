@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:cssayp_movil/notificaciones/notificaciones.dart';
 
 class NotificacionesScreen extends ConsumerStatefulWidget {
   const NotificacionesScreen({super.key});
@@ -10,61 +11,17 @@ class NotificacionesScreen extends ConsumerStatefulWidget {
 }
 
 class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
-  // Mockup data - hardcoded notifications
-  final List<MockNotification> _mockNotifications = [
-    MockNotification(
-      id: 1,
-      title: 'Boleta generada exitosamente',
-      message: 'Su boleta N° 12345 ha sido generada y está lista para su pago.',
-      type: NotificationType.success,
-      isRead: false,
-      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-    ),
-    MockNotification(
-      id: 2,
-      title: 'Recordatorio de pago',
-      message: 'Recuerde que tiene una boleta pendiente de pago. Vence el 15/11/2025.',
-      type: NotificationType.reminder,
-      isRead: false,
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    MockNotification(
-      id: 3,
-      title: 'Pago procesado',
-      message: 'Su pago de \$25,000 ha sido procesado exitosamente. Comprobante disponible.',
-      type: NotificationType.success,
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    MockNotification(
-      id: 4,
-      title: 'Actualización de datos',
-      message: 'Por favor, actualice su información de contacto para recibir notificaciones importantes.',
-      type: NotificationType.info,
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-    MockNotification(
-      id: 5,
-      title: 'Nueva funcionalidad disponible',
-      message: 'Ahora puede descargar sus comprobantes directamente desde la aplicación.',
-      type: NotificationType.info,
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 7)),
-    ),
-    MockNotification(
-      id: 6,
-      title: 'Mantenimiento programado',
-      message: 'El sistema estará en mantenimiento el 10/11/2025 de 02:00 a 04:00 AM.',
-      type: NotificationType.warning,
-      isRead: true,
-      createdAt: DateTime.now().subtract(const Duration(days: 10)),
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificacionesNotifierProvider.notifier).obtenerListadoNotificaciones();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final unreadCount = _mockNotifications.where((n) => !n.isRead).length;
+    final notificacionesState = ref.watch(notificacionesNotifierProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -78,56 +35,92 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
           style: TextStyle(fontSize: 18, fontFamily: 'Montserrat', fontWeight: FontWeight.w600),
         ),
         actions: [
-          if (unreadCount > 0)
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  for (var notification in _mockNotifications) {
-                    notification.isRead = true;
-                  }
-                });
-              },
-              child: Text(
-                'Marcar todas como leídas',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontSize: 12,
-                  fontFamily: 'Montserrat',
-                ),
-              ),
-            ),
-        ],
-      ),
-      body: _mockNotifications.isEmpty
-          ? _buildEmptyState()
-          : Column(
-              children: [
-                if (unreadCount > 0)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
-                    child: Text(
-                      'Tienes $unreadCount notificación${unreadCount > 1 ? 'es' : ''} sin leer',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        fontSize: 12,
-                        fontFamily: 'Montserrat',
-                        fontWeight: FontWeight.w600,
-                      ),
+          notificacionesState.when(
+            data: (state) {
+              final unreadCount = state.notificaciones.data.where((n) => !n.leido).length;
+              if (unreadCount > 0) {
+                return TextButton(
+                  onPressed: () {
+                    // TODO: Implement mark all as read
+                  },
+                  child: Text(
+                    'Marcar todas como leídas',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 12,
+                      fontFamily: 'Montserrat',
                     ),
                   ),
-                Expanded(
+                );
+              }
+              return const SizedBox.shrink();
+            },
+            loading: () => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
+          ),
+        ],
+      ),
+      body: notificacionesState.when(
+        data: (state) {
+          if (state.notificaciones.data.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          final unreadCount = state.notificaciones.data.where((n) => !n.leido).length;
+
+          return Column(
+            children: [
+              if (unreadCount > 0)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                  child: Text(
+                    'Tienes $unreadCount notificación${unreadCount > 1 ? 'es' : ''} sin leer',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.secondary,
+                      fontSize: 12,
+                      fontFamily: 'Montserrat',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await ref.read(notificacionesNotifierProvider.notifier).obtenerListadoNotificaciones();
+                  },
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: _mockNotifications.length,
+                    itemCount: state.notificaciones.data.length,
                     itemBuilder: (context, index) {
-                      return _buildNotificationCard(_mockNotifications[index]);
+                      return _buildNotificationCard(state.notificaciones.data[index]);
                     },
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Error al cargar notificaciones: $error'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(notificacionesNotifierProvider.notifier).obtenerListadoNotificaciones();
+                },
+                child: const Text('Reintentar'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -158,9 +151,12 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
     );
   }
 
-  Widget _buildNotificationCard(MockNotification notification) {
+  Widget _buildNotificationCard(NotificacionEntity notification) {
+    final notificationType = _mapStringToNotificationType(notification.codigoTipo);
+    final isRead = notification.leido;
+
     return Dismissible(
-      key: Key(notification.id.toString()),
+      key: Key(notification.uuid),
       direction: DismissDirection.endToStart,
       background: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -170,37 +166,22 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
         child: const Icon(Icons.delete_outline, color: Colors.white, size: 28),
       ),
       onDismissed: (direction) {
-        setState(() {
-          _mockNotifications.remove(notification);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Notificación eliminada'),
-            action: SnackBarAction(
-              label: 'Deshacer',
-              onPressed: () {
-                setState(() {
-                  _mockNotifications.insert(_mockNotifications.length, notification);
-                });
-              },
-            ),
-          ),
-        );
+        // TODO: Implement delete notification
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Funcionalidad de eliminar no implementada aún')));
       },
       child: GestureDetector(
         onTap: () {
-          setState(() {
-            notification.isRead = true;
-          });
           _showNotificationDetail(notification);
         },
         child: Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: notification.isRead ? Colors.white : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
+            color: isRead ? Colors.white : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: notification.isRead
+              color: isRead
                   ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)
                   : Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
               width: 1,
@@ -218,12 +199,12 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: _getNotificationColor(notification.type).withValues(alpha: 0.1),
+                    color: _getNotificationColor(notificationType).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    _getNotificationIcon(notification.type),
-                    color: _getNotificationColor(notification.type),
+                    _getNotificationIcon(notificationType),
+                    color: _getNotificationColor(notificationType),
                     size: 24,
                   ),
                 ),
@@ -237,16 +218,16 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              notification.title,
+                              notification.titulo,
                               style: TextStyle(
                                 fontSize: 15,
                                 fontFamily: 'Montserrat',
-                                fontWeight: notification.isRead ? FontWeight.w500 : FontWeight.w700,
+                                fontWeight: isRead ? FontWeight.w500 : FontWeight.w700,
                                 color: const Color(0xFF4D4D4D),
                               ),
                             ),
                           ),
-                          if (!notification.isRead)
+                          if (!isRead)
                             Container(
                               width: 8,
                               height: 8,
@@ -259,7 +240,7 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        notification.message,
+                        notification.mensaje,
                         style: TextStyle(
                           fontSize: 13,
                           fontFamily: 'Inter',
@@ -271,7 +252,7 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _formatDate(notification.createdAt),
+                        _formatDate(notification.fechaEnviado),
                         style: TextStyle(fontSize: 11, fontFamily: 'Inter', color: Colors.grey[500]),
                       ),
                     ],
@@ -283,6 +264,23 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
         ),
       ),
     );
+  }
+
+  NotificationType _mapStringToNotificationType(String codigoTipo) {
+    switch (codigoTipo.toLowerCase()) {
+      case 'success':
+      case 'pagos_imputados':
+        return NotificationType.success;
+      case 'warning':
+      case 'boleta_por_vencer':
+        return NotificationType.warning;
+      case 'info':
+        return NotificationType.info;
+      case 'reminder':
+        return NotificationType.reminder;
+      default:
+        return NotificationType.info;
+    }
   }
 
   IconData _getNotificationIcon(NotificationType type) {
@@ -326,7 +324,9 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
     }
   }
 
-  void _showNotificationDetail(MockNotification notification) {
+  void _showNotificationDetail(NotificacionEntity notification) {
+    final notificationType = _mapStringToNotificationType(notification.codigoTipo);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -346,19 +346,19 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: _getNotificationColor(notification.type).withValues(alpha: 0.1),
+                    color: _getNotificationColor(notificationType).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _getNotificationIcon(notification.type),
-                    color: _getNotificationColor(notification.type),
+                    _getNotificationIcon(notificationType),
+                    color: _getNotificationColor(notificationType),
                     size: 32,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    notification.title,
+                    notification.titulo,
                     style: const TextStyle(
                       fontSize: 18,
                       fontFamily: 'Montserrat',
@@ -372,7 +372,7 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              notification.message,
+              notification.mensaje,
               style: const TextStyle(fontSize: 15, fontFamily: 'Inter', color: Color(0xFF4D4D4D), height: 1.5),
             ),
             const SizedBox(height: 16),
@@ -381,7 +381,7 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
                 Icon(Icons.access_time, size: 16, color: Colors.grey[500]),
                 const SizedBox(width: 6),
                 Text(
-                  DateFormat('dd/MM/yyyy HH:mm').format(notification.createdAt),
+                  DateFormat('dd/MM/yyyy HH:mm').format(notification.fechaEnviado),
                   style: TextStyle(fontSize: 13, fontFamily: 'Inter', color: Colors.grey[600]),
                 ),
               ],
@@ -412,25 +412,6 @@ class _NotificacionesScreenState extends ConsumerState<NotificacionesScreen> {
       ),
     );
   }
-}
-
-// Mockup models
-class MockNotification {
-  final int id;
-  final String title;
-  final String message;
-  final NotificationType type;
-  bool isRead;
-  final DateTime createdAt;
-
-  MockNotification({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.type,
-    required this.isRead,
-    required this.createdAt,
-  });
 }
 
 enum NotificationType { success, warning, info, reminder }

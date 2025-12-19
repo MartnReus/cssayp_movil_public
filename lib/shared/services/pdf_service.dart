@@ -1,4 +1,5 @@
 import 'dart:io';
+// import 'dart:typed_data';
 
 import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/comprobantes/comprobantes.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
+import 'package:qr/qr.dart';
+import 'package:image/image.dart' as img;
 
 class PdfService {
   /// Genera un PDF del comprobante y lo guarda en el dispositivo
@@ -406,13 +409,15 @@ class PdfService {
       title: 'BOLETAS PAGADAS',
       content: [
         // Lista de boletas
-        ...boletas.map((boleta) => _buildBoletaItem(boleta.caratula, boleta.importe)),
+        ...boletas.map((boleta) => _buildBoletaItem(boleta.caratula, boleta.importe, boleta.idBoletaGenerada)),
       ],
       titleBorderColor: '#1f2937',
     );
   }
 
-  pw.Widget _buildBoletaItem(String caratula, String importe) {
+  pw.Widget _buildBoletaItem(String caratula, String importe, int idBoletaGenerada) {
+    final qrUrl = 'https://consultaapi.capsantafe.org.ar/api/v1/boletaEstadoById/$idBoletaGenerada';
+
     return pw.Container(
       margin: const pw.EdgeInsets.only(bottom: 6),
       padding: const pw.EdgeInsets.all(8),
@@ -426,22 +431,92 @@ class PdfService {
         ),
       ),
       child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Expanded(
-            child: pw.Text(
-              caratula,
-              style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#1f2937')),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  caratula,
+                  style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#1f2937')),
+                ),
+                pw.SizedBox(height: 4),
+                pw.Text(
+                  '\$ $importe',
+                  style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#1f2937')),
+                ),
+              ],
             ),
           ),
           pw.SizedBox(width: 10),
-          pw.Text(
-            '\$ $importe',
-            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#1f2937')),
-          ),
+          _buildQrCodeWidget(qrUrl),
         ],
       ),
     );
+  }
+
+  pw.Widget _buildQrCodeWidget(String data) {
+    try {
+      // Crear el código QR usando el paquete qr
+      final qrCode = QrCode.fromData(data: data, errorCorrectLevel: QrErrorCorrectLevel.L);
+
+      // Crear QrImage para acceder a los métodos de renderizado
+      final qrImage = QrImage(qrCode);
+      final moduleCount = qrImage.moduleCount;
+
+      // Tamaño del QR (píxeles) - aumentado para mejor legibilidad
+      const qrSize = 180;
+      const moduleSize = 4; // Tamaño de cada módulo del QR
+
+      // Crear imagen del QR usando el paquete image
+      final imageData = img.Image(width: moduleCount * moduleSize, height: moduleCount * moduleSize);
+
+      // Rellenar con blanco
+      img.fill(imageData, color: img.ColorRgb8(255, 255, 255));
+
+      // Dibujar los módulos del QR usando isDark de QrImage
+      for (var x = 0; x < moduleCount; x++) {
+        for (var y = 0; y < moduleCount; y++) {
+          if (qrImage.isDark(y, x)) {
+            // Dibujar módulo negro
+            img.fillRect(
+              imageData,
+              x1: x * moduleSize,
+              y1: y * moduleSize,
+              x2: (x + 1) * moduleSize - 1,
+              y2: (y + 1) * moduleSize - 1,
+              color: img.ColorRgb8(0, 0, 0),
+            );
+          }
+        }
+      }
+
+      // Redimensionar a 60x60
+      final resizedImage = img.copyResize(imageData, width: qrSize, height: qrSize);
+
+      // Convertir a PNG
+      final pngBytes = Uint8List.fromList(img.encodePng(resizedImage));
+
+      return pw.Container(
+        width: qrSize.toDouble(),
+        height: qrSize.toDouble(),
+        child: pw.Image(pw.MemoryImage(pngBytes), fit: pw.BoxFit.contain),
+      );
+    } catch (e) {
+      // Si hay error generando el QR, retornar un placeholder
+      return pw.Container(
+        width: 180,
+        height: 180,
+        decoration: pw.BoxDecoration(
+          color: PdfColor.fromHex('#f3f4f6'),
+          border: pw.Border.all(color: PdfColor.fromHex('#d1d5db')),
+        ),
+        child: pw.Center(
+          child: pw.Text('QR', style: pw.TextStyle(fontSize: 8, color: PdfColor.fromHex('#9ca3af'))),
+        ),
+      );
+    }
   }
 
   pw.Widget _buildFooter() {

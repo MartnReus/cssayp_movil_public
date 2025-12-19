@@ -46,6 +46,7 @@ void main() {
         boletasPagadas: [
           (
             id: 789,
+            idBoletaGenerada: 999,
             importe: '1500.00',
             caratula: 'Test Caratula',
             mvc: 'TEST-123',
@@ -87,6 +88,7 @@ void main() {
         boletasPagadas: [
           (
             id: 200,
+            idBoletaGenerada: 201,
             importe: '1000.00',
             caratula: 'Caratula 1',
             mvc: 'MVC-001',
@@ -95,6 +97,7 @@ void main() {
           ),
           (
             id: 201,
+            idBoletaGenerada: 202,
             importe: '1500.50',
             caratula: 'Caratula 2',
             mvc: 'MVC-002',
@@ -261,6 +264,7 @@ void main() {
         boletasPagadas: [
           (
             id: 1,
+            idBoletaGenerada: 101,
             importe: '2000.00',
             caratula: 'Boleta 1',
             mvc: 'MVC-1',
@@ -272,6 +276,7 @@ void main() {
           ),
           (
             id: 2,
+            idBoletaGenerada: 102,
             importe: '3000.00',
             caratula: 'Boleta 2',
             mvc: 'MVC-2',

@@ -1,5 +1,6 @@
 typedef BoletaPagada = ({
   int id,
+  int idBoletaGenerada,
   String importe,
   String caratula,
   String mvc,

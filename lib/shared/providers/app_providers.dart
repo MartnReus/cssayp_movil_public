@@ -1,6 +1,7 @@
 import 'package:cssayp_movil/auth/auth.dart';
 import 'package:cssayp_movil/boletas/boletas.dart';
 import 'package:cssayp_movil/comprobantes/comprobantes.dart';
+import 'package:cssayp_movil/notificaciones/notificaciones.dart';
 import 'package:cssayp_movil/pagos/pagos.dart';
 import 'package:cssayp_movil/shared/database/database_helper.dart';
 import 'package:cssayp_movil/shared/services/jwt_token_service.dart';
@@ -50,6 +51,14 @@ final comprobantesRepositoryProvider = FutureProvider<ComprobantesRepository>(
     comprobantesRemoteDataSource: ref.read(comprobantesRemoteDataSourceProvider),
   ),
 );
+
+final firebaseNotificationRepositoryProvider = Provider<FirebaseNotificationRepository>((ref) {
+  return FirebaseNotificationRepositoryImpl();
+});
+
+final notificacionesRepositoryProvider = Provider<NotificacionesRepository>((ref) {
+  return NotificacionesRepositoryImpl(ref.read(notificacionesDataSourceProvider), ref.read(jwtTokenServiceProvider));
+});
 //--------------------------------------
 
 //--------- Data sources ---------------
@@ -85,6 +94,9 @@ final comprobantesRemoteDataSourceProvider = Provider<ComprobantesRemoteDataSour
   (ref) => ComprobantesRemoteDataSource(client: ref.read(httpClientProvider)),
 );
 
+final notificacionesDataSourceProvider = Provider<NotificacionesDataSource>(
+  (ref) => NotificacionesDataSource(ref.read(httpClientProvider)),
+);
 //--------------------------------------
 
 //--------- Services -------------------

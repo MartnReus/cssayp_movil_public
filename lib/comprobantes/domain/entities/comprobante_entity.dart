@@ -50,6 +50,7 @@ BoletaPagada _boletaPagadaFromJson(Map<String, dynamic> json) {
 
   return (
     id: json['id'],
+    idBoletaGenerada: int.tryParse(json['id_boleta_generada']?.toString() ?? '0') ?? 0,
     importe: json['importe'],
     caratula: json['caratula'],
     mvc: json['mvc'],
